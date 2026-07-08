@@ -1,0 +1,40 @@
+name: Build & Deploy Points Ledger
+
+on:
+  schedule:
+    - cron: "15 22 * * *"   # 毎日 22:15 UTC = 日本時間 7:15
+  workflow_dispatch: {}      # 手動実行ボタンも有効化
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build (fetch sheet & embed into HTML)
+        env:
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+          POINTS_GID: ${{ secrets.POINTS_GID }}
+          CASH_GID: ${{ secrets.CASH_GID }}
+        run: python3 build.py
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
