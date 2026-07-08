@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FAFBFC">
+<title>Marriott ポイント宿泊台帳 | 無料宿泊券の狙い目カレンダー</title>
+<meta name="description" content="Marriott Bonvoyポイント宿泊の必要ポイントを毎朝自動観測。10万pt以下・7.5万pt以下の狙い目日程をホテル別カレンダーで公開。">
+<!-- OGP: 公開URLが決まったら og:url / og:image を追記してください -->
+<meta property="og:title" content="Marriott ポイント宿泊台帳 | 無料宿泊券の狙い目カレンダー">
+<meta property="og:description" content="Marriott Bonvoyポイント宿泊の必要ポイントを毎朝自動観測。10万pt以下・7.5万pt以下の狙い目日程をホテル別に公開。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Marriott ポイント宿泊台帳">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16233A;
+    --ink-soft:#3D4A63;
+    --paper:#FAFBFC;
+    --line:#DDE2EA;
+    --brass:#B08D2E;
+    --brass-soft:#F3ECD9;
+    --deal:#0E7C66;      /* Premium ≤100k */
+    --deal-bg:#E3F2EE;
+    --normal:#1A5FA8;    /* 通常カード ≤75k */
+    --normal-bg:#E4EEF9;
+    --high:#B5432E;
+    --mono:'IBM Plex Mono',monospace;
+    --serif:'Shippori Mincho',serif;
+    --sans:'Noto Sans JP',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.7}
+  a,button,label{-webkit-tap-highlight-color:rgba(176,141,46,.18)}
+  .tab,.toggle,.qlink,#totop{touch-action:manipulation}
+
+  header{border-bottom:1px solid var(--ink);padding:26px 24px 18px}
+  .masthead{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--brass);text-transform:uppercase;margin-bottom:6px}
+  h1{font-family:var(--serif);font-weight:600;font-size:clamp(21px,4vw,30px);letter-spacing:.04em}
+  h1 .en{font-size:.55em;color:var(--ink-soft);letter-spacing:.14em;margin-left:.75em;font-weight:500}
+  .runinfo{font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-align:right;line-height:1.9}
+  .runinfo b{color:var(--ink)}
+
+  .controls{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .tab{font-size:13px;padding:7px 15px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;border-radius:2px;transition:all .15s}
+  .tab:hover{border-color:var(--ink)}
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tab:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+  .toggle{display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;user-select:none;padding:7px 12px;border:1px solid var(--line);background:#fff;border-radius:2px}
+  .toggle input{accent-color:var(--deal);width:14px;height:14px;cursor:pointer}
+  .toggle.on{border-color:var(--deal);background:var(--deal-bg);color:var(--deal);font-weight:500}
+  .toggle.m-only{display:none}
+
+  .quicklinks{max-width:1100px;margin:0 auto;padding:0 24px 10px;display:none;flex-wrap:wrap;gap:6px}
+  .quicklinks.show{display:flex}
+  .qlink{font-size:11.5px;padding:5px 11px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);text-decoration:none;border-radius:2px;transition:all .15s;white-space:nowrap}
+  .qlink:hover{border-color:var(--brass);color:var(--ink)}
+
+  .legend{max-width:1100px;margin:0 auto;padding:0 24px 10px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--ink-soft)}
+  .legend .sw{display:inline-block;width:11px;height:11px;border-radius:1.5px;vertical-align:-1.5px;margin-right:4px}
+
+  .summary{max-width:1100px;margin:0 auto 6px;padding:0 24px}
+  .summary-inner{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+  .summary-inner>div{background:#fff;padding:12px 14px}
+  .summary .label{font-size:10.5px;color:var(--ink-soft);letter-spacing:.05em;margin-bottom:1px}
+  .summary .val{font-family:var(--mono);font-size:19px;font-weight:600}
+  .summary .val small{font-size:11px;font-weight:400;color:var(--ink-soft);margin-left:2px}
+  .summary .v-normal{color:var(--normal)}
+  .summary .v-deal{color:var(--deal)}
+
+  main{max-width:1100px;margin:0 auto;padding:14px 24px 50px}
+  .hotel-grid{display:grid;grid-template-columns:1fr;gap:16px}
+  .hotel{border:1px solid var(--line);background:#fff;border-radius:2px;overflow:hidden;display:flex;flex-direction:column;scroll-margin-top:16px}
+  .hotel-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:15px 20px 8px;flex-wrap:wrap;border-left:3px solid var(--brass)}
+  .hotel-name{font-family:var(--serif);font-size:17px;font-weight:600}
+  .hotel-code{font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);letter-spacing:.08em;margin-left:9px}
+  .hotel-meta{font-size:11px;color:var(--ink-soft);display:flex;gap:12px;align-items:center}
+  .fresh{font-family:var(--mono);font-size:10px;padding:1px 7px;border-radius:2px;background:var(--brass-soft);color:var(--brass);border:1px solid var(--brass)}
+  .fresh.stale{background:#F1F3F7;color:#8A93A6;border-color:#C7CDD9}
+  .hotel-stats{display:flex;gap:22px;padding:0 20px 10px;flex-wrap:wrap;border-left:3px solid transparent}
+  .stat .k{font-size:10px;color:var(--ink-soft);letter-spacing:.05em}
+  .stat .v{font-family:var(--mono);font-size:14.5px;font-weight:600}
+  .stat .v .date{font-size:10.5px;font-weight:400;color:var(--ink-soft);margin-left:5px}
+  .stat.s-deal .v{color:var(--deal)}
+  .stat.s-normal .v{color:var(--normal)}
+
+  .deals{padding:2px 20px 18px}
+  .deals-empty{font-size:12.5px;color:var(--ink-soft);padding:6px 0 4px}
+  .deal-row{display:grid;grid-template-columns:auto auto 1fr auto;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid #F1F3F7}
+  .deal-row:last-child{border-bottom:none}
+  .deal-rank{font-family:var(--mono);font-size:11px;color:var(--ink-soft);width:20px}
+  .deal-date{font-family:var(--mono);font-size:13px;font-weight:500}
+  .deal-dow{font-size:11px;color:var(--ink-soft);margin-left:3px}
+  .deal-dow.wknd{color:var(--high)}
+  .deal-tagwrap{font-size:10.5px}
+  .deal-badge{display:inline-block;padding:1px 7px;border-radius:2px;font-size:10px;font-family:var(--mono)}
+  .deal-badge.n{background:var(--normal-bg);color:var(--normal)}
+  .deal-badge.p{background:var(--deal-bg);color:var(--deal)}
+  .deal-pts{font-family:var(--mono);font-size:14px;font-weight:600;text-align:right}
+  .deal-pts.n{color:var(--normal)}
+  .deal-pts.p{color:var(--deal)}
+  .deal-cash{font-family:var(--mono);font-size:10px;color:var(--ink-soft);font-weight:400;display:block}
+  .deal-link{display:inline-block;margin-top:10px;font-size:12px;color:var(--brass);text-decoration:none;border-bottom:1px solid transparent}
+  .deal-link:hover{border-bottom-color:var(--brass)}
+  .hotel-name a{color:inherit;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .15s}
+  .hotel-name a:hover{border-bottom-color:var(--ink)}
+  .hotel-name a::after{content:' ↗';font-size:.7em;color:var(--ink-soft);font-family:var(--mono)}
+
+  .section-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase;padding:6px 20px 0}
+  .chart-wrap{padding:6px 14px 12px}
+  .chart-wrap svg{display:block;width:100%;height:auto}
+  .chart-wrap.chart-line{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .chart-wrap.chart-line svg{min-width:680px}
+  /* ヒートマップ(モバイル): 7ヶ月×日別を1画面で俯瞰 */
+  .chart-wrap.chart-heat{padding:8px 12px 14px}
+  .chart-wrap.chart-heat svg{max-width:100%}
+  .chart-wrap .hc{stroke:none}
+  .chart-wrap .hc-na{fill:#EEF0F4}
+  .chart-wrap .hc-full{fill:#F6E6E2}
+  .chart-wrap .hc-n{fill:var(--normal)}
+  .chart-wrap .hc-p{fill:var(--deal)}
+  .chart-wrap .hc-1{fill:#A0A9BB}
+  .chart-wrap .hc-2{fill:#5D6B85}
+  .chart-wrap .hc-3{fill:var(--ink)}
+  .chart-wrap .hc.sel{stroke:var(--brass);stroke-width:1.4}
+
+  /* コンパクト折れ線(モバイル既定): 360×250設計・1画面表示 */
+  .chart-wrap.chart-compact{padding:6px 8px 10px}
+  .chart-compact .pline{stroke-width:1.6}
+  .chart-compact .pdot{stroke-width:1.1}
+  .chart-compact .ylabel{font-size:10.5px}
+  .chart-compact .mlabel{font-size:10.5px}
+  .chart-compact .thr-tag{font-size:10.5px}
+  .chart-wrap .cl-marker{display:none;fill:#fff;stroke:var(--brass);stroke-width:2;pointer-events:none}
+  .chart-wrap .cl-marker.on{display:inline}
+  .chart-wrap .hm-daylabel{font-family:var(--mono);font-size:8.5px;fill:var(--ink-soft)}
+  .chart-wrap .hm-mlabel{font-family:var(--sans);font-size:10.5px;fill:var(--ink);font-weight:600}
+  .heat-caption{font-family:var(--mono);font-size:10px;color:var(--ink-soft);letter-spacing:.06em;padding:0 14px 6px;display:flex;justify-content:space-between}
+  .heat-caption .sw{display:inline-block;width:9px;height:9px;border-radius:1.5px;vertical-align:-1px;margin-right:3px}
+
+  /* いま一番の狙い目(サマリー直下のハイライト行) */
+  .highlight{max-width:1100px;margin:0 auto;padding:0 24px 6px;display:none}
+  .highlight.show{display:block}
+  .highlight a{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;
+    border:1px solid #E6DBB8;background:var(--brass-soft);border-radius:2px;
+    padding:10px 14px;text-decoration:none;color:var(--ink);transition:border-color .15s}
+  .highlight a:hover{border-color:var(--brass)}
+  .highlight .hl-mark{flex-basis:100%;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--brass);font-weight:600}
+  .highlight .hl-date{font-family:var(--mono);font-size:13.5px;font-weight:600}
+  .highlight .hl-name{font-weight:600;font-size:13.5px}
+  .highlight .hl-pt{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--deal)}
+  .highlight .hl-pt small{font-weight:600;font-size:11px}
+  .highlight .hl-arrow{margin-left:auto;color:var(--brass);font-family:var(--mono)}
+  .chart-wrap .axis{stroke:var(--line);stroke-width:1}
+  .chart-wrap .grid{stroke:#EEF0F4;stroke-width:1}
+  .chart-wrap .thr-normal{stroke:var(--normal);stroke-width:1.4;stroke-dasharray:5 4;opacity:.75}
+  .chart-wrap .thr-premium{stroke:var(--deal);stroke-width:1.4;stroke-dasharray:5 4;opacity:.75}
+  .chart-wrap .pline{fill:none;stroke:var(--ink);stroke-width:2.2}
+  .chart-wrap .parea{fill:var(--ink);opacity:.045}
+  .chart-wrap .pdot{fill:#fff;stroke:var(--ink);stroke-width:1.5}
+  .chart-wrap .pdot.d-normal{fill:var(--normal);stroke:var(--normal)}
+  .chart-wrap .pdot.d-premium{fill:var(--deal);stroke:var(--deal)}
+  .chart-wrap .ylabel,.chart-wrap .xlabel{font-family:var(--sans);font-weight:500;font-size:13px;fill:var(--ink-soft)}
+  .chart-wrap .mlabel{font-family:var(--sans);font-weight:500;font-size:12.5px;fill:var(--ink-soft);text-anchor:middle}
+  .chart-wrap .thr-tag{font-family:var(--sans);font-size:12.5px;font-weight:600}
+  .chart-wrap .thr-tag.n{fill:var(--normal)}
+  .chart-wrap .thr-tag.p{fill:var(--deal)}
+  .chart-wrap .hit{fill:transparent;cursor:default}
+
+  #tip{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;line-height:1.6;padding:7px 10px;border-radius:2px;z-index:99;display:none;white-space:nowrap;box-shadow:0 4px 14px rgba(22,35,58,.3)}
+  #tip .d{color:#C8D2E4}
+  #tip .tag-n{color:#8FC1F2}
+  #tip .tag-p{color:#7FDCC4}
+  #tip .cash{color:#E4C465}
+
+  .notice{max-width:1100px;margin:0 auto;padding:0 24px 16px;font-size:11.5px;color:var(--ink-soft)}
+  .state-msg{max-width:1100px;margin:24px auto;padding:0 24px;text-align:center;color:var(--ink-soft)}
+  .state-msg .big{font-family:var(--serif);font-size:17px;margin-bottom:8px;color:var(--ink)}
+  .setup{max-width:640px;margin:30px auto;padding:24px;border:1px dashed var(--line);background:#fff;font-size:13px}
+  .setup code{font-family:var(--mono);font-size:11px;background:#F1F3F7;padding:1px 5px;border-radius:2px}
+  .setup ol{padding-left:20px;margin:10px 0}
+  .setup li{margin:6px 0}
+
+  .note-banner{max-width:1100px;margin:0 auto;padding:0 24px}
+  .note-banner-inner{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    background:#16233A;color:#fff;padding:13px 20px;border-radius:3px;margin-bottom:4px}
+  .note-banner-inner .nb-text{font-family:var(--serif);font-size:15px;font-weight:500;letter-spacing:.02em}
+  .note-banner-inner .nb-text .nb-mark{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--brass);display:block;margin-bottom:2px;text-transform:uppercase}
+  .note-banner-inner .nb-cta{flex-shrink:0;background:var(--brass);color:#16233A;font-weight:700;font-size:13px;
+    padding:8px 18px;border-radius:2px;text-decoration:none;white-space:nowrap;transition:background .15s}
+  .note-banner-inner .nb-cta:hover{background:#C9A23D}
+  .note-hotel-link{display:flex;align-items:center;gap:8px;margin:2px 20px 14px;padding:9px 12px;
+    background:var(--brass-soft);border:1px solid #E6DBB8;border-radius:2px;
+    font-size:12.5px;color:var(--ink);text-decoration:none;transition:background .15s}
+  .note-hotel-link:hover{background:#EFE6CC}
+  .note-hotel-link .nh-mark{font-family:var(--mono);font-size:10px;color:var(--brass);font-weight:600;letter-spacing:.08em}
+  .note-hotel-link .nh-arrow{margin-left:auto;color:var(--brass);font-family:var(--mono)}
+  .note-banner.bottom .note-banner-inner{margin-top:30px;margin-bottom:20px}
+
+  .fna-note{max-width:1100px;margin:0 auto;padding:0 24px 12px;font-size:11.5px;color:var(--ink-soft);display:none}
+  .fna-note.show{display:block}
+  .fna-note a{color:var(--brass);text-decoration:none;border-bottom:1px solid var(--brass-soft);transition:border-color .15s}
+  .fna-note a:hover{border-bottom-color:var(--brass)}
+
+  #totop{position:fixed;right:16px;bottom:16px;width:42px;height:42px;border:1px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:2px;font-family:var(--mono);font-size:16px;cursor:pointer;display:none;
+    box-shadow:0 3px 12px rgba(22,35,58,.14);z-index:50;transition:border-color .15s}
+  #totop.show{display:block}
+  #totop:hover{border-color:var(--ink)}
+  #totop:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+  footer{border-top:1px solid var(--line);padding:18px 24px;text-align:center;font-size:10.5px;color:var(--ink-soft);line-height:1.9}
+  footer .mono{font-family:var(--mono)}
+
+  @media (max-width:640px){
+    header{padding:16px 16px 12px}
+    h1 .en{display:none}
+    .runinfo{text-align:left;font-size:10px;line-height:1.8}
+    .controls,.summary,main,.legend,.notice,.fna-note,.quicklinks,.note-banner,.highlight{padding-left:16px;padding-right:16px}
+
+    /* 地域タブ: 画面上部に固定し、横スクロール1行で常時アクセス可能に */
+    #region-tabs{position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:1px solid var(--line);
+      flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+      padding-top:10px;padding-bottom:10px}
+    #region-tabs::-webkit-scrollbar{display:none}
+    .tab{flex:0 0 auto;padding:10px 16px;font-size:13.5px}
+    .toggle{padding:10px 12px;font-size:13px}
+    .toggle.m-only{display:flex}
+
+    /* ホテルジャンプ: 縦積みをやめて横スクロール1行に */
+    .quicklinks.show{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .quicklinks::-webkit-scrollbar{display:none}
+    .qlink{flex:0 0 auto;padding:9px 13px;font-size:12px}
+
+    /* 固定タブの高さぶん、アンカー位置を下げる */
+    .hotel{scroll-margin-top:66px}
+
+    .summary .val{font-size:17px}
+    .hotel-head{padding:13px 14px 6px}
+    .hotel-stats{gap:10px 18px;padding:0 14px 10px}
+    .section-label{padding:6px 14px 0}
+    .chart-wrap.chart-heat{padding:8px 10px 10px}
+    .deals{padding:2px 14px 16px}
+    .deal-row{gap:8px}
+    .deal-link{display:block;padding:9px 0 2px;margin-top:6px}
+    .note-hotel-link{margin:2px 14px 14px}
+
+    /* Note帯: CTAを全幅ボタン化 */
+    .note-banner-inner{padding:14px 16px}
+    .note-banner-inner .nb-cta{flex-basis:100%;text-align:center;padding:12px 18px}
+
+    footer{padding:16px 16px 70px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Marriott Bonvoy — Points Ledger</div>
+      <h1>ポイント宿泊台帳<span class="en">MARRIOTT POINTS LEDGER</span></h1>
+    </div>
+    <div class="runinfo" id="runinfo">読み込み中…</div>
+  </div>
+</header>
+
+<div class="note-banner" id="note-banner"></div>
+
+<div class="controls" id="region-tabs"></div>
+
+<div class="quicklinks" id="hotel-quicklinks"></div>
+
+<div class="controls" style="padding-top:0">
+  <label class="toggle" id="t-deal-wrap">
+    <input type="checkbox" id="t-deal">
+    10万pt以下がある月のみ
+  </label>
+  <label class="toggle" id="t-normal-wrap">
+    <input type="checkbox" id="t-normal">
+    7.5万pt以下がある月のみ
+  </label>
+  <label class="toggle m-only" id="t-heat-wrap">
+    <input type="checkbox" id="t-heat">
+    カレンダー表示
+  </label>
+</div>
+
+<div class="legend">
+  <span>グラフの点線: </span>
+  <span><span class="sw" style="background:#1A5FA8"></span>通常カード無料宿泊券 7.5万pt</span>
+  <span><span class="sw" style="background:#0E7C66"></span>Premium無料宿泊券 10万pt</span>
+  <span style="color:#8A93A6">— 折れ線が点線を下回る日が狙い目。着色ドットが圏内の日</span>
+</div>
+
+<div class="fna-note" id="fna-note">
+  7.5万pt / 10万ptは、クレジットカードの継続特典「無料宿泊券(FNA)」で狙える目安ラインです。
+  無料宿泊券のもらい方・賢い使い方は <a id="fna-note-link" href="#" target="_blank" rel="noopener">Noteの攻略ガイド ↗</a> で解説しています。
+</div>
+
+<div class="summary" id="summary"></div>
+<div class="highlight" id="highlight"></div>
+
+<main id="hotels"></main>
+
+<div class="note-banner bottom"></div>
+
+<div id="setup-panel" style="display:none" class="setup">
+  <b>準備中</b>
+  <p style="margin-top:8px">データを準備しています。しばらくしてから再度アクセスしてください。</p>
+</div>
+
+<footer>
+  本サイトはMarriott公式サイト上のカレンダー表示を定期取得した<b>参考情報</b>です。ポイント数・空室状況は随時変動します。予約前に必ず公式サイトの客室詳細画面で最新情報をご確認ください。<br>
+  <span class="mono">Marriott Points Ledger — updated automatically every morning</span>
+</footer>
+
+<div id="tip"></div>
+<button id="totop" aria-label="ページ上部へ戻る" title="ページ上部へ">↑</button>
+
+<script>
+'use strict';
+
+/* ============================================================
+   データ: GitHub Actionsのビルド時に自動で埋め込まれる。
+   手で編集しないこと(下のマーカー間はビルドで丸ごと置換される)
+============================================================ */
+/*__POINTS_DATA_START__*/
+const RAW_POINTS_CSV = ``;
+/*__POINTS_DATA_END__*/
+/*__CASH_DATA_START__*/
+const RAW_CASH_CSV = ``;
+/*__CASH_DATA_END__*/
+
+/* ---- Note導線(マネタイズ) ----
+   NOTE_BANNER: サイト上部の帯。全ページ共通。text を空にすると非表示
+   NOTE_HOTEL_LINK.text: カード内リンクの文言(URLは下のNOTE_HOTEL_LINKSで個別指定)
+   NOTE_HOTEL_LINKS: そのホテルの宿泊記がある場合だけ property_code→URL を登録。
+                     登録したホテルのカードにだけリンクが出る(未登録ホテルには出ない) */
+const NOTE_BANNER = {
+  text: 'Marriott無料宿泊券の狙い方・カード戦略を徹底解説',
+  cta: 'Noteで読む',
+  url: 'https://note.com/fast_yarrow9973'   // ← Noteトップ。看板記事(有料)に差し替えるとCVR向上が見込めます
+};
+const NOTE_HOTEL_LINK = {
+  text: 'このホテルの宿泊記を読む'   // カード内リンクの文言(該当ホテルのみ表示)
+};
+const NOTE_HOTEL_LINKS = {
+  // そのホテルの宿泊記があるものだけ登録(例):
+  // 'UKYRZ': 'https://note.com/xxxx/n/リッツ京都宿泊記',
+  // 'OKARZ': 'https://note.com/xxxx/n/沖縄宿泊記',
+};
+
+const NORMAL_FNA = 75000;    // 通常カード無料宿泊券
+const PREMIUM_FNA = 100000;  // Premium無料宿泊券
+const STALE_HOURS = 48;      // これより古い取得はグレー表示
+
+/* ============================================================
+   CSVパーサ
+============================================================ */
+function parseCSV(text){
+  const rows = [];
+  let cur = [''], inQ = false, c = 0;
+  for(let i=0;i<text.length;i++){
+    const ch = text[i];
+    if(inQ){
+      if(ch==='"'){ if(text[i+1]==='"'){cur[c]+='"';i++;} else inQ=false; }
+      else cur[c]+=ch;
+    }else{
+      if(ch==='"') inQ=true;
+      else if(ch===','){ cur.push(''); c++; }
+      else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&text[i+1]==='\n')i++; rows.push(cur); cur=['']; c=0; }
+      else cur[c]+=ch;
+    }
+  }
+  if(cur.length>1||cur[0]!=='') rows.push(cur);
+  return rows;
+}
+
+function rowsToObjects(rows){
+  if(rows.length < 2) return [];
+  const head = rows[0].map(s=>String(s).trim().toLowerCase());
+  return rows.slice(1).map(r=>{
+    const o = {};
+    head.forEach((h,i)=>o[h]=r[i]!==undefined?String(r[i]).trim():'');
+    return o;
+  });
+}
+
+const toBool = v => v==='TRUE'||v==='true'||v==='1'||v===1||v===true;
+const toNum = v => {
+  if(v===''||v==null) return null;
+  const n = Number(String(v).replace(/[,\s¥円]/g,''));
+  return Number.isFinite(n)&&n>0 ? n : null;
+};
+function normDate(v){
+  const s = String(v).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m = s.match(/^(\d{4})[\/年](\d{1,2})[\/月](\d{1,2})/);
+  if(m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+  const d = new Date(s);
+  if(!isNaN(d.getTime())){
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  return '';
+}
+
+/* ============================================================
+   データ整形: property_code+stay_dateで重複除去(最新checked_at優先)
+============================================================ */
+function dedupeLatest(objs, valueKeys){
+  const map = new Map();
+  for(const o of objs){
+    const code = (o.property_code||'').toUpperCase();
+    const date = normDate(o.stay_date);
+    if(!code || !date) continue;
+    const key = code+'__'+date;
+    const prev = map.get(key);
+    if(!prev || String(o.checked_at||'') >= String(prev.checked_at||'')){
+      map.set(key, o);
+    }
+  }
+  return map;
+}
+
+function buildModel(pointObjs, cashObjs){
+  const pMap = dedupeLatest(pointObjs);
+  const cMap = cashObjs ? dedupeLatest(cashObjs) : new Map();
+
+  const hotels = new Map();
+  for(const [key, p] of pMap){
+    const code = (p.property_code||'').toUpperCase();
+    if(!hotels.has(code)){
+      hotels.set(code, {
+        code,
+        name: p.hotel_name || code,
+        region: p.region_name || '—',
+        priority: Number(p.priority_score||50),
+        url: (p.source_url && /^https?:\/\//.test(p.source_url)) ? p.source_url : `https://www.marriott.com/ja/hotels/${code.toLowerCase()}/overview/`,
+        checkedAt: '',
+        days: []
+      });
+    }
+    const h = hotels.get(code);
+    const c = cMap.get(key);
+    const pts = toBool(p.points_available) ? toNum(p.points_required) : null;
+    const cash = c && toBool(c.cash_available) ? toNum(c.cash_price_jpy) : null;
+    h.days.push({
+      date: normDate(p.stay_date),
+      points: pts,
+      cash,
+      value: (pts && cash) ? cash/pts : null
+    });
+    if(String(p.checked_at||'') > h.checkedAt) h.checkedAt = String(p.checked_at||'');
+  }
+  for(const h of hotels.values()) h.days.sort((a,b)=>a.date<b.date?-1:1);
+  return [...hotels.values()].sort((a,b)=>b.priority-a.priority);
+}
+
+/* ============================================================
+   状態
+============================================================ */
+let MODEL = [];
+let activeRegion = 'すべて';
+let dealOnly = false, normalOnly = false;
+let heatMode = false;   // モバイル: false=コンパクト折れ線(既定) / true=カレンダーヒートマップ
+let latestRunId = '', latestChecked = '', totalRows = 0;
+
+/* ============================================================
+   描画
+============================================================ */
+const fmt = n => n==null ? '—' : n.toLocaleString('ja-JP');
+const esc = s => String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+function tier(p){
+  if(p==null) return 'na';
+  if(p<=NORMAL_FNA) return 't0';
+  if(p<=85000) return 't1';
+  if(p<=PREMIUM_FNA) return 't3';
+  if(p<=120000) return 't4';
+  if(p<=150000) return 't5';
+  return 't6';
+}
+
+function fmtChecked(iso){
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return iso.slice(0,10);
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+function isStale(iso){
+  if(!iso) return true;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) || (Date.now()-d.getTime()) > STALE_HOURS*3600*1000;
+}
+
+function regions(){
+  const set = new Set(MODEL.map(h=>h.region));
+  return ['すべて', ...set];
+}
+
+function renderNoteBanner(){
+  const els = document.querySelectorAll('.note-banner');
+  const active = NOTE_BANNER && NOTE_BANNER.text && NOTE_BANNER.url;
+  els.forEach(el=>{
+    if(!active){ el.style.display='none'; return; }
+    el.style.display='';
+    el.innerHTML = `<div class="note-banner-inner">
+      <div class="nb-text"><span class="nb-mark">Note ── 攻略ガイド</span>${esc(NOTE_BANNER.text)}</div>
+      <a class="nb-cta" href="${esc(NOTE_BANNER.url)}" target="_blank" rel="noopener">${esc(NOTE_BANNER.cta||'Noteで読む')} ↗</a>
+    </div>`;
+  });
+  // 凡例下の解説行(バナーURLが設定されている時だけ表示)
+  const fn = document.getElementById('fna-note');
+  if(fn){
+    if(active){
+      fn.classList.add('show');
+      const a = document.getElementById('fna-note-link');
+      if(a) a.href = NOTE_BANNER.url;
+    }else{
+      fn.classList.remove('show');
+    }
+  }
+}
+
+function noteLinkFor(code){
+  // そのホテル専用の記事がある場合だけリンクを出す(共通リンクのばら撒きはしない)
+  const url = NOTE_HOTEL_LINKS && NOTE_HOTEL_LINKS[code];
+  if(!url) return null;
+  return { url, text: (NOTE_HOTEL_LINK && NOTE_HOTEL_LINK.text) || 'このホテルの宿泊記を読む' };
+}
+
+function renderRunInfo(){
+  document.getElementById('runinfo').innerHTML =
+    `最終更新 <b>${esc(fmtChecked(latestChecked)||'—')}</b>` +
+    (latestRunId ? `<br>run <b>${esc(latestRunId)}</b>` : '') +
+    `<br>${MODEL.length}ホテル / ${totalRows.toLocaleString()}日分`;
+}
+
+function renderTabs(){
+  const wrap = document.getElementById('region-tabs');
+  wrap.innerHTML = '';
+  for(const r of regions()){
+    const b = document.createElement('button');
+    b.className = 'tab' + (r===activeRegion?' active':'');
+    b.textContent = r;
+    b.onclick = () => { activeRegion = r; render(); };
+    wrap.appendChild(b);
+  }
+}
+
+function renderQuicklinks(hotels){
+  const wrap = document.getElementById('hotel-quicklinks');
+  if(!wrap) return;
+  if(hotels.length < 2){
+    wrap.classList.remove('show');
+    wrap.innerHTML = '';
+    return;
+  }
+  wrap.classList.add('show');
+  wrap.innerHTML = hotels.map(h=>
+    `<a class="qlink" href="#hotel-${esc(h.code)}">${esc(h.name)}</a>`
+  ).join('');
+}
+
+function renderSummary(hotels){
+  let nDays=0, pDays=0, avail=0, minP=Infinity, minHotel='', minCode='', minDate='', bestVal=0, bestValTxt='';
+  for(const h of hotels) for(const d of h.days){
+    if(d.points==null) continue;
+    avail++;
+    if(d.points<=NORMAL_FNA) nDays++;
+    if(d.points<=PREMIUM_FNA) pDays++;
+    if(d.points<minP){ minP=d.points; minHotel=h.name; minCode=h.code; minDate=d.date; }
+    if(d.value && d.value>bestVal && d.points<=PREMIUM_FNA){ bestVal=d.value; bestValTxt=`${d.value.toFixed(2)}円/pt`; }
+  }
+  document.getElementById('summary').innerHTML = `<div class="summary-inner">
+    <div><div class="label">対象ホテル</div><div class="val">${hotels.length}<small>軒</small></div></div>
+    <div><div class="label">7.5万pt以下(通常)</div><div class="val v-normal">${nDays.toLocaleString()}<small>日</small></div></div>
+    <div><div class="label">10万pt以下(Premium)</div><div class="val v-deal">${pDays.toLocaleString()}<small>日</small></div></div>
+    <div><div class="label">最安 ${esc(minHotel? '('+minHotel.slice(0,10)+'…)':'')}</div><div class="val v-deal">${minP===Infinity?'—':fmt(minP)}<small>pt</small></div></div>
+    ${bestValTxt?`<div><div class="label">最高バリュー(≤10万pt)</div><div class="val v-deal">${bestValTxt}</div></div>`:''}
+  </div>`;
+
+  // いま一番の狙い目(無料宿泊券圏内の最安日) — タップで該当ホテルへ
+  const hl = document.getElementById('highlight');
+  if(hl){
+    if(pDays>0 && minDate){
+      const wd = ['日','月','火','水','木','金','土'][new Date(minDate+'T00:00:00').getDay()];
+      const badge = minP<=NORMAL_FNA ? '◎通常圏内' : '○Premium圏内';
+      hl.classList.add('show');
+      hl.innerHTML = `<a href="#hotel-${esc(minCode)}">
+        <span class="hl-mark">BEST ── いま一番の狙い目</span>
+        <span class="hl-date">${esc(minDate)}(${wd})</span>
+        <span class="hl-name">${esc(minHotel)}</span>
+        <span class="hl-pt">${fmt(minP)} pt <small>${badge}</small></span>
+        <span class="hl-arrow">↓</span>
+      </a>`;
+    }else{
+      hl.classList.remove('show');
+      hl.innerHTML = '';
+    }
+  }
+}
+
+function monthHasDeal(days, threshold){
+  return days.some(d=>d.points!=null && d.points<=threshold);
+}
+
+/* ============================================================
+   折れ線グラフ(宿泊日 × 必要ポイント)をSVGで生成
+   欠損日(空室なし)は線を途切れさせる
+============================================================ */
+const SVGNS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs){
+  const el = document.createElementNS(SVGNS, tag);
+  for(const k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+function buildLineChart(days){
+  const W = 1120;
+  const H = 420;
+  const padL = 66, padR = 20, padT = 24, padB = 46;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const svg = svgEl('svg', {viewBox:`0 0 ${W} ${H}`, preserveAspectRatio:'xMidYMid meet', role:'img'});
+
+  const pts = days.map(d=>d.points);
+  const valid = pts.filter(p=>p!=null);
+  if(!valid.length){
+    svg.appendChild(svgEl('text', {x:W/2, y:H/2, 'text-anchor':'middle', class:'ylabel'}));
+    svg.lastChild.textContent = '空室データがありません';
+    return svg;
+  }
+
+  // Y軸レンジ: データ範囲に閾値(7.5万/10万)を含めて丸める
+  let lo = Math.min(...valid, NORMAL_FNA);
+  let hi = Math.max(...valid, PREMIUM_FNA);
+  lo = Math.floor(lo/10000)*10000;
+  hi = Math.ceil(hi/10000)*10000;
+  if(hi===lo) hi = lo + 10000;
+
+  const n = days.length;
+  const x = i => padL + (n<=1 ? plotW/2 : (i/(n-1))*plotW);
+  const y = p => padT + plotH - ((p-lo)/(hi-lo))*plotH;
+
+  // Y grid + labels(2万pt刻み)
+  const step = (hi-lo) > 120000 ? 40000 : 20000;
+  for(let v=lo; v<=hi; v+=step){
+    const yy = y(v);
+    svg.appendChild(svgEl('line', {x1:padL, y1:yy, x2:W-padR, y2:yy, class:'grid'}));
+    const t = svgEl('text', {x:padL-6, y:yy+3, 'text-anchor':'end', class:'ylabel'});
+    t.textContent = (v/1000)+'k';
+    svg.appendChild(t);
+  }
+
+  // 閾値ライン
+  if(NORMAL_FNA>=lo && NORMAL_FNA<=hi){
+    svg.appendChild(svgEl('line', {x1:padL, y1:y(NORMAL_FNA), x2:W-padR, y2:y(NORMAL_FNA), class:'thr-normal'}));
+    const t = svgEl('text', {x:W-padR, y:y(NORMAL_FNA)-3, 'text-anchor':'end', class:'thr-tag n'});
+    t.textContent = '通常 75k';
+    svg.appendChild(t);
+  }
+  if(PREMIUM_FNA>=lo && PREMIUM_FNA<=hi){
+    svg.appendChild(svgEl('line', {x1:padL, y1:y(PREMIUM_FNA), x2:W-padR, y2:y(PREMIUM_FNA), class:'thr-premium'}));
+    const t = svgEl('text', {x:W-padR, y:y(PREMIUM_FNA)-3, 'text-anchor':'end', class:'thr-tag p'});
+    t.textContent = 'Premium 100k';
+    svg.appendChild(t);
+  }
+
+  // 月境界の縦うっすら線 + 月ラベル
+  let prevMonth = '';
+  days.forEach((d,i)=>{
+    const m = d.date.slice(0,7);
+    if(m!==prevMonth){
+      if(prevMonth!==''){
+        svg.appendChild(svgEl('line', {x1:x(i), y1:padT, x2:x(i), y2:padT+plotH, class:'grid'}));
+      }
+      const t = svgEl('text', {x:x(i)+2, y:H-8, class:'mlabel', 'text-anchor':'start'});
+      t.textContent = m.slice(5)+'月';
+      svg.appendChild(t);
+      prevMonth = m;
+    }
+  });
+
+  // 線(欠損で分割)とエリア
+  let seg = [];
+  const segments = [];
+  days.forEach((d,i)=>{
+    if(d.points!=null) seg.push([x(i), y(d.points), i, d]);
+    else if(seg.length){ segments.push(seg); seg=[]; }
+  });
+  if(seg.length) segments.push(seg);
+
+  for(const s of segments){
+    if(s.length>1){
+      const area = `M ${s[0][0]} ${padT+plotH} ` + s.map(p=>`L ${p[0]} ${p[1]}`).join(' ') + ` L ${s[s.length-1][0]} ${padT+plotH} Z`;
+      svg.appendChild(svgEl('path', {d:area, class:'parea'}));
+    }
+    const line = s.map((p,i)=>`${i?'L':'M'} ${p[0]} ${p[1]}`).join(' ');
+    svg.appendChild(svgEl('path', {d:line, class:'pline'}));
+  }
+
+  // ドット(圏内は色付け)+ ホバー領域
+  days.forEach((d,i)=>{
+    if(d.points==null) return;
+    const cls = d.points<=NORMAL_FNA ? 'pdot d-normal' : d.points<=PREMIUM_FNA ? 'pdot d-premium' : 'pdot';
+    const r = d.points<=PREMIUM_FNA ? 4 : 2.8;
+    svg.appendChild(svgEl('circle', {cx:x(i), cy:y(d.points), r, class:cls}));
+    // ホバー用の透明な縦帯
+    const hit = svgEl('rect', {x:x(i)-4, y:padT, width:8, height:plotH, class:'hit'});
+    let tip = d.date + '\n' + fmt(d.points)+' pt';
+    if(d.points<=NORMAL_FNA) tip += ' ◎通常圏内';
+    else if(d.points<=PREMIUM_FNA) tip += ' ○Premium圏内';
+    if(d.cash) tip += '\n¥'+fmt(d.cash) + (d.value?` (${d.value.toFixed(2)}円/pt)`:'');
+    hit.dataset.tip = tip;
+    svg.appendChild(hit);
+  });
+
+  return svg;
+}
+
+/* ============================================================
+   コンパクト折れ線(モバイル既定)
+   360×250の縦長設計。全期間を1画面・スクロールなしで表示。
+   点は圏内の日のみ打ち、タップは最寄りの日を自動選択。
+============================================================ */
+function buildCompactLineChart(days){
+  const W = 360, H = 250;
+  const padL = 40, padR = 10, padT = 16, padB = 26;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const svg = svgEl('svg', {viewBox:`0 0 ${W} ${H}`, preserveAspectRatio:'xMidYMid meet', role:'img'});
+
+  const valid = days.map(d=>d.points).filter(p=>p!=null);
+  if(!valid.length){
+    const t = svgEl('text', {x:W/2, y:H/2, 'text-anchor':'middle', class:'ylabel'});
+    t.textContent = '空室データがありません';
+    svg.appendChild(t);
+    return svg;
+  }
+
+  // Y軸レンジ(PC版と同じ丸めロジック)
+  let lo = Math.min(...valid, NORMAL_FNA);
+  let hi = Math.max(...valid, PREMIUM_FNA);
+  lo = Math.floor(lo/10000)*10000;
+  hi = Math.ceil(hi/10000)*10000;
+  if(hi===lo) hi = lo + 10000;
+
+  const n = days.length;
+  const x = i => padL + (n<=1 ? plotW/2 : (i/(n-1))*plotW);
+  const y = p => padT + plotH - ((p-lo)/(hi-lo))*plotH;
+
+  // Yグリッド: 3〜4本に抑える
+  const step = Math.max(10000, Math.ceil((hi-lo)/4/10000)*10000);
+  for(let v=lo; v<=hi; v+=step){
+    const yy = y(v);
+    svg.appendChild(svgEl('line', {x1:padL, y1:yy, x2:W-padR, y2:yy, class:'grid'}));
+    const t = svgEl('text', {x:padL-5, y:yy+3, 'text-anchor':'end', class:'ylabel'});
+    t.textContent = (v/1000)+'k';
+    svg.appendChild(t);
+  }
+
+  // 閾値ライン(短縮タグ)
+  if(NORMAL_FNA>=lo && NORMAL_FNA<=hi){
+    svg.appendChild(svgEl('line', {x1:padL, y1:y(NORMAL_FNA), x2:W-padR, y2:y(NORMAL_FNA), class:'thr-normal'}));
+    const t = svgEl('text', {x:W-padR, y:y(NORMAL_FNA)-3, 'text-anchor':'end', class:'thr-tag n'});
+    t.textContent = '75k';
+    svg.appendChild(t);
+  }
+  if(PREMIUM_FNA>=lo && PREMIUM_FNA<=hi){
+    svg.appendChild(svgEl('line', {x1:padL, y1:y(PREMIUM_FNA), x2:W-padR, y2:y(PREMIUM_FNA), class:'thr-premium'}));
+    const t = svgEl('text', {x:W-padR, y:y(PREMIUM_FNA)-3, 'text-anchor':'end', class:'thr-tag p'});
+    t.textContent = '100k';
+    svg.appendChild(t);
+  }
+
+  // 月境界 + 月ラベル
+  let prevMonth = '';
+  days.forEach((d,i)=>{
+    const m = d.date.slice(0,7);
+    if(m!==prevMonth){
+      if(prevMonth!==''){
+        svg.appendChild(svgEl('line', {x1:x(i), y1:padT, x2:x(i), y2:padT+plotH, class:'grid'}));
+      }
+      const t = svgEl('text', {x:x(i)+9, y:H-8, class:'mlabel'});
+      const mo = parseInt(m.slice(5),10);
+      t.textContent = (mo===1 ? `'${m.slice(2,4)} ` : '') + mo + '月';
+      svg.appendChild(t);
+      prevMonth = m;
+    }
+  });
+
+  // 線(欠損で分割)とエリア
+  let seg = [];
+  const segments = [];
+  days.forEach((d,i)=>{
+    if(d.points!=null) seg.push([x(i), y(d.points)]);
+    else if(seg.length){ segments.push(seg); seg=[]; }
+  });
+  if(seg.length) segments.push(seg);
+
+  for(const s of segments){
+    if(s.length>1){
+      const area = `M ${s[0][0].toFixed(1)} ${padT+plotH} ` + s.map(p=>`L ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ') + ` L ${s[s.length-1][0].toFixed(1)} ${padT+plotH} Z`;
+      svg.appendChild(svgEl('path', {d:area, class:'parea'}));
+    }
+    const line = s.map((p,i)=>`${i?'L':'M'} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
+    svg.appendChild(svgEl('path', {d:line, class:'pline'}));
+  }
+
+  // ドットは圏内の日のみ(200日全打ちは潰れるため)
+  days.forEach((d,i)=>{
+    if(d.points==null || d.points>PREMIUM_FNA) return;
+    const cls = d.points<=NORMAL_FNA ? 'pdot d-normal' : 'pdot d-premium';
+    svg.appendChild(svgEl('circle', {cx:x(i), cy:y(d.points), r:3, class:cls}));
+  });
+
+  // タップ: プロット全面を1枚のオーバーレイで受け、最寄りの有効日を自動選択
+  const overlay = svgEl('rect', {x:padL, y:padT, width:plotW, height:plotH, class:'hit cl-overlay'});
+  const marker = svgEl('circle', {r:4.5, class:'cl-marker'});
+  overlay.addEventListener('click', ev=>{
+    const bb = overlay.getBoundingClientRect();
+    if(!bb.width) return;
+    const idx = Math.round(((ev.clientX - bb.left)/bb.width) * (n-1));
+    let best = -1, bestDist = Infinity;
+    for(let k=0;k<n;k++){
+      if(days[k].points==null) continue;
+      const dd = Math.abs(k-idx);
+      if(dd < bestDist){ bestDist = dd; best = k; }
+    }
+    if(best < 0) return;
+    const d = days[best];
+    const wd = ['日','月','火','水','木','金','土'][new Date(d.date+'T00:00:00').getDay()];
+    let tipText = `${d.date}(${wd})\n${fmt(d.points)} pt`;
+    if(d.points<=NORMAL_FNA) tipText += ' ◎通常圏内';
+    else if(d.points<=PREMIUM_FNA) tipText += ' ○Premium圏内';
+    if(d.cash) tipText += '\n¥'+fmt(d.cash) + (d.value?` (${d.value.toFixed(2)}円/pt)`:'');
+    overlay.dataset.tip = tipText;   // 直後にバブルするdocumentのclickハンドラが表示する
+    marker.setAttribute('cx', x(best).toFixed(1));
+    marker.setAttribute('cy', y(d.points).toFixed(1));
+    document.querySelectorAll('.cl-marker.on').forEach(m=>{ if(m!==marker) m.classList.remove('on'); });
+    marker.classList.add('on');
+  });
+  svg.appendChild(overlay);
+  svg.appendChild(marker);
+
+  return svg;
+}
+
+/* ============================================================
+   カレンダーヒートマップ(モバイル向け)
+   縦軸=月、横軸=1〜31日。色でポイント帯を即断できる俯瞰ビュー。
+============================================================ */
+function buildHeatmap(days){
+  const svg = svgEl('svg', {viewBox:'0 0 320 100', preserveAspectRatio:'xMidYMid meet', role:'img'});
+  if(!days.length){
+    const t = svgEl('text', {x:160, y:50, 'text-anchor':'middle', class:'hm-mlabel'});
+    t.textContent = '空室データがありません';
+    svg.appendChild(t);
+    return svg;
+  }
+
+  // 月ごとに日→データの辞書化
+  const months = new Map();
+  for(const d of days){
+    const ym = d.date.slice(0,7);
+    if(!months.has(ym)) months.set(ym, {});
+    const dd = parseInt(d.date.slice(8,10),10);
+    months.get(ym)[dd] = d;
+  }
+  const monthKeys = [...months.keys()].sort();
+
+  const CELL = 9, GAP = 1.4, LABEL_W = 40, HEADER = 14, RIGHT_PAD = 4;
+  const W = LABEL_W + 31*(CELL+GAP) - GAP + RIGHT_PAD;
+  const H = HEADER + monthKeys.length*(CELL+GAP) - GAP + 4;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  // 日付マーカー(上部)
+  [1,5,10,15,20,25,30].forEach(d=>{
+    const x = LABEL_W + (d-1)*(CELL+GAP) + CELL/2;
+    const t = svgEl('text', {x, y:9, class:'hm-daylabel', 'text-anchor':'middle'});
+    t.textContent = d;
+    svg.appendChild(t);
+  });
+
+  const dow = ['日','月','火','水','木','金','土'];
+  let prevYear = '';
+
+  monthKeys.forEach((ym, mi)=>{
+    const y = HEADER + mi*(CELL+GAP);
+    const [yr, mo] = ym.split('-');
+    // 月ラベル(年が変わったら年も添える)
+    const label = svgEl('text', {x:LABEL_W-6, y:y+CELL-1, class:'hm-mlabel', 'text-anchor':'end'});
+    label.textContent = (yr!==prevYear ? `'${yr.slice(2)} ` : '') + `${parseInt(mo,10)}月`;
+    svg.appendChild(label);
+    prevYear = yr;
+
+    const dim = new Date(parseInt(yr,10), parseInt(mo,10), 0).getDate();
+    for(let dd=1; dd<=dim; dd++){
+      const x = LABEL_W + (dd-1)*(CELL+GAP);
+      const d = months.get(ym)[dd];
+      let cls, tip;
+      if(!d || d.points==null){
+        cls = d && d.points==null ? 'hc hc-full' : 'hc hc-na';
+        if(d){
+          const wd = new Date(d.date+'T00:00:00').getDay();
+          tip = `${d.date}(${dow[wd]})\n空室なし`;
+        }
+      }else{
+        const t = d.points<=NORMAL_FNA ? 'hc-n' : d.points<=PREMIUM_FNA ? 'hc-p' :
+                  d.points<=120000 ? 'hc-1' : d.points<=150000 ? 'hc-2' : 'hc-3';
+        cls = 'hc '+t;
+        const wd = new Date(d.date+'T00:00:00').getDay();
+        tip = `${d.date}(${dow[wd]})\n${fmt(d.points)} pt`;
+        if(d.points<=NORMAL_FNA) tip += ' ◎通常圏内';
+        else if(d.points<=PREMIUM_FNA) tip += ' ○Premium圏内';
+        if(d.cash) tip += '\n¥'+fmt(d.cash) + (d.value?` (${d.value.toFixed(2)}円/pt)`:'');
+      }
+      const rect = svgEl('rect', {x, y, width:CELL, height:CELL, rx:1.5, class:cls});
+      if(tip) rect.dataset.tip = tip;
+      svg.appendChild(rect);
+    }
+  });
+
+  return svg;
+}
+
+/* モバイル判定(ヒートマップに切替) */
+function isNarrow(){ return window.matchMedia('(max-width:640px)').matches; }
+
+function renderHotels(hotels){
+  const main = document.getElementById('hotels');
+  main.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'hotel-grid';
+  let shown = 0;
+  for(const h of hotels){
+    const avail = h.days.filter(d=>d.points!=null);
+    const pDeals = avail.filter(d=>d.points<=PREMIUM_FNA);
+    const nDeals = avail.filter(d=>d.points<=NORMAL_FNA);
+    if(dealOnly && !pDeals.length) continue;
+    if(normalOnly && !nDeals.length) continue;
+    shown++;
+    const min = avail.length ? avail.reduce((a,b)=>a.points<=b.points?a:b) : null;
+    const stale = isStale(h.checkedAt);
+
+    const card = document.createElement('section');
+    card.className = 'hotel';
+    card.id = 'hotel-' + h.code;
+    card.innerHTML = `
+      <div class="hotel-head">
+        <div><span class="hotel-name"><a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.name)}</a></span><span class="hotel-code">${esc(h.code)}</span></div>
+        <div class="hotel-meta">
+          <span>${esc(h.region)}</span>
+          <span class="fresh${stale?' stale':''}">取得 ${esc(fmtChecked(h.checkedAt)||'—')}</span>
+        </div>
+      </div>
+      <div class="hotel-stats">
+        <div class="stat s-deal"><div class="k">最安ポイント</div>
+          <div class="v">${min?fmt(min.points)+' pt':'—'}<span class="date">${min?min.date:''}</span></div></div>
+        <div class="stat s-normal"><div class="k">7.5万pt以下</div>
+          <div class="v">${nDeals.length}<span class="date">日</span></div></div>
+        <div class="stat s-deal"><div class="k">10万pt以下</div>
+          <div class="v">${pDeals.length}<span class="date">日 / ${avail.length}日</span></div></div>
+        <div class="stat"><div class="k">空室なし</div>
+          <div class="v">${h.days.length-avail.length}<span class="date">日</span></div></div>
+      </div>
+      <div class="section-label">${isNarrow() ? (heatMode ? 'ポイントカレンダー(月×日)' : 'ポイント推移 ── タップで日別詳細') : 'ポイント推移(宿泊日ごと)'}</div>
+      <div class="chart-wrap"></div>
+      <div class="section-label">狙い目日 ─ 必要ポイントが安い順</div>
+      <div class="deals"></div>`;
+
+    const cw = card.querySelector('.chart-wrap');
+    if(isNarrow() && heatMode){
+      cw.classList.add('chart-heat');
+      cw.appendChild(buildHeatmap(h.days));
+      cw.insertAdjacentHTML('afterend',
+        `<div class="heat-caption">
+          <span><span class="sw" style="background:var(--normal)"></span>通常◎ <span class="sw" style="background:var(--deal)"></span>Premium○ <span class="sw" style="background:#A0A9BB"></span>圏外(濃=高) <span class="sw" style="background:#F6E6E2"></span>空室なし</span>
+          <span>タップで詳細</span>
+        </div>`);
+    }else if(isNarrow()){
+      cw.classList.add('chart-compact');
+      cw.appendChild(buildCompactLineChart(h.days));
+    }else{
+      cw.classList.add('chart-line');
+      cw.appendChild(buildLineChart(h.days));
+    }
+
+    // 狙い目日リスト(安い順トップ8)
+    const dealsEl = card.querySelector('.deals');
+    const top = avail.slice().sort((a,b)=>a.points-b.points || (a.date<b.date?-1:1)).slice(0,8);
+    if(!top.length){
+      dealsEl.innerHTML = '<div class="deals-empty">空室のある日がありません。</div>';
+    }else{
+      const dow = ['日','月','火','水','木','金','土'];
+      dealsEl.innerHTML = top.map((d,i)=>{
+        const wd = new Date(d.date+'T00:00:00').getDay();
+        const isWknd = wd===0||wd===6;
+        const inN = d.points<=NORMAL_FNA, inP = d.points<=PREMIUM_FNA;
+        const badge = inN ? '<span class="deal-badge n">通常◎</span>' : inP ? '<span class="deal-badge p">Premium○</span>' : '';
+        const ptsCls = inN ? 'n' : inP ? 'p' : '';
+        const cash = d.cash ? `<span class="deal-cash">¥${fmt(d.cash)}${d.value?` ・ ${d.value.toFixed(2)}円/pt`:''}</span>` : '';
+        return `<div class="deal-row">
+          <span class="deal-rank">${i+1}</span>
+          <span><span class="deal-date">${d.date.slice(5)}</span><span class="deal-dow${isWknd?' wknd':''}">(${dow[wd]})</span></span>
+          <span class="deal-tagwrap">${badge}</span>
+          <span class="deal-pts ${ptsCls}">${fmt(d.points)}<small style="font-weight:400"> pt</small>${cash}</span>
+        </div>`;
+      }).join('');
+    }
+    // 公式ページリンク
+    const link = document.createElement('a');
+    link.className = 'deal-link';
+    link.href = h.url; link.target = '_blank'; link.rel = 'noopener';
+    link.textContent = 'Marriott公式で空室・予約を確認 ↗';
+    dealsEl.appendChild(link);
+
+    // Note記事リンク(設定されていれば)
+    const nl = noteLinkFor(h.code);
+    if(nl){
+      const noteA = document.createElement('a');
+      noteA.className = 'note-hotel-link';
+      noteA.href = nl.url; noteA.target = '_blank'; noteA.rel = 'noopener';
+      noteA.innerHTML = `<span class="nh-mark">NOTE</span>${esc(nl.text)}<span class="nh-arrow">↗</span>`;
+      card.appendChild(noteA);
+    }
+
+    grid.appendChild(card);
+  }
+  main.appendChild(grid);
+  if(!shown){
+    main.innerHTML = '<div class="state-msg"><div class="big">条件に合うホテルがありません</div>フィルタを解除してみてください。</div>';
+  }
+}
+
+function render(){
+  const regionHotels = activeRegion==='すべて' ? MODEL : MODEL.filter(h=>h.region===activeRegion);
+  const hotels = regionHotels.filter(h=>{
+    const avail = h.days.filter(d=>d.points!=null);
+    if(dealOnly && !avail.some(d=>d.points<=PREMIUM_FNA)) return false;
+    if(normalOnly && !avail.some(d=>d.points<=NORMAL_FNA)) return false;
+    return true;
+  });
+  renderNoteBanner();
+  renderRunInfo();
+  renderTabs();
+  renderQuicklinks(hotels);
+  renderSummary(hotels);
+  renderHotels(hotels);
+}
+
+/* ---------- ツールチップ(hover + タップ両対応) ---------- */
+const tip = document.getElementById('tip');
+function fillTip(c){
+  const lines = c.dataset.tip.split('\n');
+  tip.innerHTML = lines.map((l,i)=>{
+    if(i===0) return `<span class="d">${esc(l)}</span>`;
+    if(l.includes('◎')) return `<span class="tag-n">${esc(l)}</span>`;
+    if(l.includes('○')) return `<span class="tag-p">${esc(l)}</span>`;
+    if(l.startsWith('¥')) return `<span class="cash">${esc(l)}</span>`;
+    return esc(l);
+  }).join('<br>');
+  tip.style.display = 'block';
+}
+function placeTip(clientX, clientY){
+  const w = tip.offsetWidth, hgt = tip.offsetHeight;
+  const x = Math.min(clientX+14, window.innerWidth - w - 8);
+  let y;
+  if(isNarrow()){
+    y = clientY - hgt - 14;            // 指で隠れないよう上に出す
+    if(y < 4) y = clientY + 16;
+  }else{
+    y = Math.min(clientY+16, window.innerHeight - hgt - 8);
+  }
+  tip.style.left = Math.max(4, x) + 'px';
+  tip.style.top = Math.max(4, y) + 'px';
+}
+document.addEventListener('mouseover', e=>{
+  const c = e.target.closest('.hit,.hc');
+  if(!c || !c.dataset.tip){ tip.style.display='none'; return; }
+  fillTip(c);
+});
+document.addEventListener('mousemove', e=>{
+  if(tip.style.display!=='block') return;
+  placeTip(e.clientX, e.clientY);
+});
+document.addEventListener('mouseout', e=>{ if(e.target.closest('.hit,.hc')) tip.style.display='none'; });
+// スマホ: セル/日付帯をタップで表示、他をタップで消す。タップしたセルは枠で強調
+document.addEventListener('click', e=>{
+  const c = e.target.closest('.hit,.hc');
+  const prev = document.querySelector('.hc.sel');
+  if(prev && prev !== c) prev.classList.remove('sel');
+  // コンパクトチャートのマーカーは、当該オーバーレイのタップ以外で消す
+  if(!(c && c.classList.contains('cl-overlay'))){
+    document.querySelectorAll('.cl-marker.on').forEach(m=>m.classList.remove('on'));
+  }
+  if(c && c.dataset.tip){
+    if(c.classList.contains('hc')) c.classList.add('sel');
+    fillTip(c);
+    placeTip(e.clientX, e.clientY);
+  }else{
+    tip.style.display='none';
+  }
+});
+
+/* ---------- トップへ戻る ---------- */
+const totop = document.getElementById('totop');
+window.addEventListener('scroll', ()=>{
+  totop.classList.toggle('show', window.scrollY > 600);
+}, {passive:true});
+totop.addEventListener('click', ()=>{ window.scrollTo({top:0}); });
+
+/* ---------- モバイル境界を跨いだら再描画(向き変更・ウィンドウ幅変更対応) ---------- */
+let _wasNarrow = isNarrow();
+let _resizeTimer = null;
+window.addEventListener('resize', ()=>{
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(()=>{
+    const now = isNarrow();
+    if(now !== _wasNarrow){ _wasNarrow = now; if(MODEL.length) render(); }
+  }, 180);
+});
+
+/* ---------- フィルタ ---------- */
+document.getElementById('t-deal').addEventListener('change', e=>{
+  dealOnly = e.target.checked;
+  if(dealOnly){ normalOnly = false; document.getElementById('t-normal').checked = false; document.getElementById('t-normal-wrap').classList.remove('on'); }
+  document.getElementById('t-deal-wrap').classList.toggle('on', dealOnly);
+  render();
+});
+document.getElementById('t-normal').addEventListener('change', e=>{
+  normalOnly = e.target.checked;
+  if(normalOnly){ dealOnly = false; document.getElementById('t-deal').checked = false; document.getElementById('t-deal-wrap').classList.remove('on'); }
+  document.getElementById('t-normal-wrap').classList.toggle('on', normalOnly);
+  render();
+});
+document.getElementById('t-heat').addEventListener('change', e=>{
+  heatMode = e.target.checked;
+  document.getElementById('t-heat-wrap').classList.toggle('on', heatMode);
+  render();
+});
+
+/* ============================================================
+   起動: 埋め込みデータを読んで描画(外部通信なし)
+============================================================ */
+function boot(){
+  const info = document.getElementById('runinfo');
+  if(!RAW_POINTS_CSV.trim()){
+    info.textContent = 'データ未接続';
+    document.getElementById('setup-panel').style.display = 'block';
+    document.getElementById('summary').innerHTML = '';
+    return;
+  }
+  try{
+    const pointObjs = rowsToObjects(parseCSV(RAW_POINTS_CSV));
+    let cashObjs = null;
+    if(RAW_CASH_CSV.trim()){
+      try{ cashObjs = rowsToObjects(parseCSV(RAW_CASH_CSV)); }
+      catch(e){ console.warn('価格データの解析に失敗(ポイントのみで表示):', e); }
+    }
+    MODEL = buildModel(pointObjs, cashObjs);
+    totalRows = pointObjs.length;
+    latestChecked = pointObjs.reduce((m,o)=>String(o.checked_at||'')>m?String(o.checked_at):m, '');
+    latestRunId = (pointObjs.find(o=>String(o.checked_at||'')===latestChecked)||{}).run_id || '';
+    if(!MODEL.length){
+      document.getElementById('hotels').innerHTML =
+        '<div class="state-msg"><div class="big">まだデータがありません</div>今朝の自動取得後に表示されます。</div>';
+      renderRunInfo();
+      return;
+    }
+    render();
+  }catch(err){
+    info.textContent = '読み込みエラー';
+    document.getElementById('hotels').innerHTML =
+      `<div class="state-msg"><div class="big">データを読み込めませんでした</div>
+       ${esc(err.message)}</div>`;
+  }
+}
+
+boot();
+</script>
+</body>
+</html>
