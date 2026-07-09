@@ -2,7 +2,7 @@
 """
 Googleスプレッドシートからデータを取得し、index.html に埋め込んで dist/ に出力する。
 GitHub Actions から実行される。環境変数:
-  SHEET_ID  (必須) スプレッドシートのID
+  SHEET_ID   (必須) スプレッドシートのID
   POINTS_GID (必須) Marriott_Raw タブのgid (例: 0)
   CASH_GID   (任意) Marriott_Raw_Cash タブのgid。未設定なら価格は埋め込まない
 """
@@ -33,7 +33,10 @@ def inject(html: str, start: str, end: str, varname: str, csv_text: str) -> str:
     pattern = re.compile(re.escape(f"/*{start}*/") + r".*?" + re.escape(f"/*{end}*/"), re.S)
     new_html, n = pattern.subn(lambda m: block, html)
     if n != 1:
-        raise RuntimeError(f"マーカー {start} が見つかりません(index.htmlを確認)")
+        raise RuntimeError(
+            f"マーカー {start} が見つかりません(index.htmlを確認)。"
+            f"形式は /*{start}*/ です。"
+        )
     return new_html
 
 def main():
