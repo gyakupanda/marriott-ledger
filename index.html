@@ -35,7 +35,7 @@
   html{scroll-behavior:smooth}
   body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.7}
   a,button,label{-webkit-tap-highlight-color:rgba(176,141,46,.18)}
-  .tab,.toggle,.qlink,#totop{touch-action:manipulation}
+  .tab,.toggle,.qselect,#totop{touch-action:manipulation}
 
   header{border-bottom:1px solid var(--ink);padding:26px 24px 18px}
   .masthead{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
@@ -55,10 +55,16 @@
   .toggle.on{border-color:var(--deal);background:var(--deal-bg);color:var(--deal);font-weight:500}
   .toggle.m-only{display:none}
 
-  .quicklinks{max-width:1100px;margin:0 auto;padding:0 24px 10px;display:none;flex-wrap:wrap;gap:6px}
-  .quicklinks.show{display:flex}
-  .qlink{font-size:11.5px;padding:5px 11px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);text-decoration:none;border-radius:2px;transition:all .15s;white-space:nowrap}
-  .qlink:hover{border-color:var(--brass);color:var(--ink)}
+  .quicklinks{max-width:1100px;margin:0 auto;padding:0 24px 10px;display:none}
+  .quicklinks.show{display:flex;gap:8px}
+  .qselect{font-family:var(--sans);font-size:12.5px;padding:9px 12px;border:1px solid var(--line);
+    background:#fff;color:var(--ink);border-radius:2px;max-width:420px;width:100%;cursor:pointer;flex:1 1 auto;min-width:0}
+  .qselect:focus{outline:none;border-color:var(--brass)}
+  .cat-badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;padding:2px 7px;border-radius:2px;
+    border:1px solid var(--line);color:var(--ink-soft);white-space:nowrap}
+  .cat-badge.cat-lux{border-color:var(--brass);color:var(--brass);background:var(--brass-soft)}
+  .cat-badge.cat-prm{border-color:var(--ink-soft);color:var(--ink-soft)}
+  .cat-badge.cat-vac{border-color:var(--deal);color:var(--deal);background:var(--deal-bg)}
 
   .legend{max-width:1100px;margin:0 auto;padding:0 24px 10px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--ink-soft)}
   .legend .sw{display:inline-block;width:11px;height:11px;border-radius:1.5px;vertical-align:-1.5px;margin-right:4px}
@@ -92,6 +98,15 @@
   .deals-empty{font-size:12.5px;color:var(--ink-soft);padding:6px 0 4px}
   .deal-row{display:grid;grid-template-columns:auto auto 1fr auto;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid #F1F3F7}
   .deal-row:last-child{border-bottom:none}
+  /* 狙い目の開閉(モバイル): 上位3日+残りをdetailsで畳む */
+  .deal-more summary{list-style:none;cursor:pointer;user-select:none;
+    font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--brass);
+    padding:9px 0 5px;border-bottom:1px solid #F1F3F7}
+  .deal-more summary::-webkit-details-marker{display:none}
+  .deal-more .less{display:none}
+  .deal-more[open] .more{display:none}
+  .deal-more[open] .less{display:inline}
+  .deal-more[open] summary{border-bottom:none}
   .deal-rank{font-family:var(--mono);font-size:11px;color:var(--ink-soft);width:20px}
   .deal-date{font-family:var(--mono);font-size:13px;font-weight:500}
   .deal-dow{font-size:11px;color:var(--ink-soft);margin-left:3px}
@@ -142,19 +157,20 @@
   .heat-caption{font-family:var(--mono);font-size:10px;color:var(--ink-soft);letter-spacing:.06em;padding:0 14px 6px;display:flex;justify-content:space-between}
   .heat-caption .sw{display:inline-block;width:9px;height:9px;border-radius:1.5px;vertical-align:-1px;margin-right:3px}
 
-  /* いま一番の狙い目(サマリー直下のハイライト行) */
-  .highlight{max-width:1100px;margin:0 auto;padding:0 24px 6px;display:none}
-  .highlight.show{display:block}
-  .highlight a{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;
-    border:1px solid #E6DBB8;background:var(--brass-soft);border-radius:2px;
-    padding:10px 14px;text-decoration:none;color:var(--ink);transition:border-color .15s}
-  .highlight a:hover{border-color:var(--brass)}
-  .highlight .hl-mark{flex-basis:100%;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--brass);font-weight:600}
-  .highlight .hl-date{font-family:var(--mono);font-size:13.5px;font-weight:600}
-  .highlight .hl-name{font-weight:600;font-size:13.5px}
-  .highlight .hl-pt{font-family:var(--mono);font-size:13.5px;font-weight:700;color:var(--deal)}
-  .highlight .hl-pt small{font-weight:600;font-size:11px}
-  .highlight .hl-arrow{margin-left:auto;color:var(--brass);font-family:var(--mono)}
+  .tab .tab-n{font-family:var(--mono);font-size:10px;opacity:.5;margin-left:1px}
+  .tab.active .tab-n{opacity:.8}
+  .qselect.qsort{flex:0 0 auto;width:auto;max-width:170px}
+
+  /* 筆者チップ(ヘッダー内のNote導線) */
+  .author-chip{display:none;align-items:center;gap:9px;margin-top:12px;padding:5px 13px 5px 6px;
+    border:1px solid var(--line);border-radius:999px;background:#fff;text-decoration:none;color:var(--ink);
+    transition:border-color .15s}
+  .author-chip.show{display:inline-flex}
+  .author-chip:hover{border-color:var(--brass)}
+  .author-chip .ac-img{width:36px;height:36px;border-radius:50%;display:block;border:1px solid var(--brass-soft)}
+  .author-chip .ac-text{font-size:11.5px;color:var(--ink-soft);letter-spacing:.02em;line-height:1.4}
+  .author-chip .ac-text b{color:var(--ink);font-weight:600}
+  .author-chip .ac-arrow{font-family:var(--mono);font-size:11px;color:var(--brass)}
   .chart-wrap .axis{stroke:var(--line);stroke-width:1}
   .chart-wrap .grid{stroke:#EEF0F4;stroke-width:1}
   .chart-wrap .thr-normal{stroke:var(--normal);stroke-width:1.4;stroke-dasharray:5 4;opacity:.75}
@@ -220,24 +236,18 @@
     header{padding:16px 16px 12px}
     h1 .en{display:none}
     .runinfo{text-align:left;font-size:10px;line-height:1.8}
-    .controls,.summary,main,.legend,.notice,.fna-note,.quicklinks,.note-banner,.highlight{padding-left:16px;padding-right:16px}
+    .controls,.summary,main,.legend,.notice,.fna-note,.quicklinks,.note-banner{padding-left:16px;padding-right:16px}
 
-    /* 地域タブ: 画面上部に固定し、横スクロール1行で常時アクセス可能に */
-    #region-tabs{position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:1px solid var(--line);
-      flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
-      padding-top:10px;padding-bottom:10px}
-    #region-tabs::-webkit-scrollbar{display:none}
-    .tab{flex:0 0 auto;padding:10px 16px;font-size:13.5px}
+    /* 地域タブ: 折り返して全タブ一望(横スクロール・上部固定を廃止) */
+    #region-tabs{flex-wrap:wrap;gap:6px;padding-top:10px;padding-bottom:6px}
+    .tab{flex:0 0 auto;padding:8px 13px;font-size:13px}
     .toggle{padding:10px 12px;font-size:13px}
     .toggle.m-only{display:flex}
 
-    /* ホテルジャンプ: 縦積みをやめて横スクロール1行に */
-    .quicklinks.show{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-    .quicklinks::-webkit-scrollbar{display:none}
-    .qlink{flex:0 0 auto;padding:9px 13px;font-size:12px}
+    /* ホテルジャンプ: セレクトを全幅に */
+    .qselect{max-width:none;padding:11px 12px;font-size:13px}
 
-    /* 固定タブの高さぶん、アンカー位置を下げる */
-    .hotel{scroll-margin-top:66px}
+    .hotel{scroll-margin-top:12px}
 
     .summary .val{font-size:17px}
     .hotel-head{padding:13px 14px 6px}
@@ -265,12 +275,17 @@
     <div>
       <div class="eyebrow">Marriott Bonvoy — Points Ledger</div>
       <h1>ポイント宿泊台帳<span class="en">MARRIOTT POINTS LEDGER</span></h1>
+      <a class="author-chip" id="author-chip" href="#" target="_blank" rel="noopener">
+        <img class="ac-img" src="data:image/webp;base64,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" alt="アレアレ" width="36" height="36">
+        <span class="ac-text">筆者 <b>アレアレ</b> のNote ─ 無料宿泊券・カード戦略</span>
+        <span class="ac-arrow">↗</span>
+      </a>
     </div>
     <div class="runinfo" id="runinfo">読み込み中…</div>
   </div>
 </header>
 
-<div class="note-banner" id="note-banner"></div>
+<div class="note-banner top"></div>
 
 <div class="controls" id="region-tabs"></div>
 
@@ -304,15 +319,20 @@
 </div>
 
 <div class="summary" id="summary"></div>
-<div class="highlight" id="highlight"></div>
 
 <main id="hotels"></main>
 
 <div class="note-banner bottom"></div>
 
 <div id="setup-panel" style="display:none" class="setup">
-  <b>準備中</b>
-  <p style="margin-top:8px">データを準備しています。しばらくしてから再度アクセスしてください。</p>
+  <b>初期設定(サイト管理者向け)</b>
+  <p style="margin-top:8px">データ接続が未設定です。以下の手順で公開CSVのURLをこのファイルに埋め込んでください。</p>
+  <ol>
+    <li>Googleスプレッドシートで「ファイル → 共有 → ウェブに公開」</li>
+    <li>対象を「<b>Marriott_Raw</b>」タブ、形式を「カンマ区切り形式(.csv)」にして公開し、URLをコピー</li>
+    <li>この index.html 内の <code>POINTS_CSV_URL</code> にそのURLを貼る</li>
+    <li>(任意)同様に「Marriott_Raw_Cash」タブのURLを <code>CASH_CSV_URL</code> に貼ると価格も表示されます</li>
+  </ol>
 </div>
 
 <footer>
@@ -327,15 +347,12 @@
 'use strict';
 
 /* ============================================================
-   データ: GitHub Actionsのビルド時に自動で埋め込まれる。
-   手で編集しないこと(下のマーカー間はビルドで丸ごと置換される)
+   設定: 公開CSVのURLをここに貼る(管理者が1回だけ設定)
+   スプレッドシート「ファイル→共有→ウェブに公開」で
+   Marriott_Raw タブをCSV形式で公開したURN
 ============================================================ */
-/*__POINTS_DATA_START__*/
-const RAW_POINTS_CSV = ``;
-/*__POINTS_DATA_END__*/
-/*__CASH_DATA_START__*/
-const RAW_CASH_CSV = ``;
-/*__CASH_DATA_END__*/
+const POINTS_CSV_URL = '';   // ← 必須: Marriott_RawのCSV公開URL
+const CASH_CSV_URL   = '';   // ← 任意: Marriott_Raw_CashのCSV公開URL(価格・円/pt表示が有効になる)
 
 /* ---- Note導線(マネタイズ) ----
    NOTE_BANNER: サイト上部の帯。全ページ共通。text を空にすると非表示
@@ -358,7 +375,142 @@ const NOTE_HOTEL_LINKS = {
 
 const NORMAL_FNA = 75000;    // 通常カード無料宿泊券
 const PREMIUM_FNA = 100000;  // Premium無料宿泊券
+
+/* ホテルグレード(Marriott公式の階層に準拠+ヴィラ/クラブを独立分類)
+   ブランド名のキーワードで自動判定。誤判定があれば CATEGORY_OVERRIDES で
+   property_code→'LUX'|'PRM'|'SEL'|'VAC' を個別指定して上書きできます
+   ※コードは大文字で指定(小文字のCSVコードも内部で大文字化されます) */
+const CATEGORY_DEFS = [
+  {key:'LUX', label:'ラグジュアリー', cls:'lux', kw:[
+    'リッツ・カールトン','リッツカールトン','Ritz-Carlton',
+    'セントレジス','St. Regis','St Regis',
+    'エディション','EDITION',
+    'ラグジュアリーコレクション','Luxury Collection',
+    'JWマリオット','JW Marriott','JW MARRIOTT',
+    'ブルガリ','Bulgari','W大阪','W Osaka','W東京','W Tokyo'
+  ]},
+  {key:'VAC', label:'ヴィラ/クラブ', cls:'vac', kw:[
+    // Marriott Vacation Club系("Marriott's 〜"の所有格が目印)とWestin/Sheratonヴィラ
+    "Marriott's",'Vacation Club','Ocean Club','Beach Club',
+    'Resort Villas','Ocean Villas','Lagoons',
+    'ヴァケーションクラブ','バケーションクラブ'
+  ]},
+  {key:'SEL', label:'セレクト', cls:'sel', kw:[
+    'コートヤード','Courtyard','ACホテル','AC Hotel',
+    'アロフト','Aloft','モクシー','Moxy',
+    'フェアフィールド','Fairfield','フォーポイント','Four Points',
+    'スプリングヒル','SpringHill','エレメント','Element',
+    'レジデンス・イン','レジデンスイン','Residence Inn','タウンプレイス','TownePlace'
+  ]},
+  {key:'PRM', label:'プレミアム', cls:'prm', kw:[
+    'マリオット','Marriott','ウェスティン','Westin',
+    'シェラトン','Sheraton','オートグラフ','Autograph',
+    'デルタ','Delta','ル・メリディアン','ルメリディアン','Méridien','Meridien',
+    'Design Hotels','デザインホテル','トリビュート','Tribute','ルネッサンス','Renaissance'
+  ]},
+];
+const CATEGORY_ORDER = {LUX:0, PRM:1, SEL:2, VAC:3};
+const CATEGORY_OVERRIDES = {
+  // 例) 'HNLPW': 'VAC', 'UKYRZ': 'LUX',
+};
+function categorize(h){
+  const ov = CATEGORY_OVERRIDES[h.code];
+  if(ov && CATEGORY_DEFS.some(c=>c.key===ov)) return ov;
+  const n = h.name || '';
+  for(const c of CATEGORY_DEFS){
+    // 判定はLUX→VAC→SEL→PRMの順。
+    // 例: リッツ・カールトンレジデンス→LUX、Marriott's Ocean Club→VAC、
+    //     コートヤード・バイ・マリオット→SEL が、包含キーワードの「マリオット」より優先される
+    if(c.kw.some(k=>n.includes(k))) return c.key;
+  }
+  return 'PRM';   // 不明ブランドは中間グレード扱い(必要ならOVERRIDESで修正)
+}
 const STALE_HOURS = 48;      // これより古い取得はグレー表示
+
+/* ホテル公式ページURL(公称の英語名から正規URL形式で生成 / 5軒は実ページで検証済み)
+   優先順位: このマップ > CSVのsource_url > 汎用フォールバック
+   リンク切れを見つけたら該当行のURLを差し替えてください */
+const HOTEL_URLS = {
+  TYOJW: 'https://www.marriott.com/ja/hotels/tyojw-jw-marriott-hotel-tokyo/overview/',   // 検証済み
+  TYORZ: 'https://www.ritzcarlton.com/ja/hotels/tyorz-the-ritz-carlton-tokyo/overview/',
+  TYOET: 'https://www.marriott.com/ja/hotels/tyoet-the-tokyo-edition-toranomon/overview/',   // 検証済み
+  TYOEB: 'https://www.marriott.com/ja/hotels/tyoeb-the-tokyo-edition-ginza/overview/',
+  TYOLC: 'https://www.marriott.com/ja/hotels/tyolc-the-prince-gallery-tokyo-kioicho-a-luxury-collection-hotel/overview/',
+  TYONZ: 'https://www.ritzcarlton.com/ja/hotels/tyonz-the-ritz-carlton-nikko/overview/',
+  UKYRZ: 'https://www.ritzcarlton.com/ja/hotels/ukyrz-the-ritz-carlton-kyoto/overview/',   // 検証済み
+  OSALC: 'https://www.marriott.com/ja/hotels/osalc-hotel-the-mitsui-kyoto-a-luxury-collection-hotel-and-spa/overview/',   // 検証済み
+  UKYLC: 'https://www.marriott.com/ja/hotels/ukylc-suiran-a-luxury-collection-hotel-kyoto/overview/',
+  OKARZ: 'https://www.ritzcarlton.com/ja/hotels/okarz-the-ritz-carlton-okinawa/overview/',
+  OKALC: 'https://www.marriott.com/ja/hotels/okalc-iraph-sui-a-luxury-collection-hotel-miyako-okinawa/overview/',
+  TYOWI: 'https://www.marriott.com/ja/hotels/tyowi-the-westin-tokyo/overview/',
+  TYOAM: 'https://www.marriott.com/ja/hotels/tyoam-mesm-tokyo-autograph-collection/overview/',
+  TYOSI: 'https://www.marriott.com/ja/hotels/tyosi-sheraton-grande-tokyo-bay-hotel/overview/',
+  TYOYS: 'https://www.marriott.com/ja/hotels/tyoys-yokohama-bay-sheraton-hotel-and-towers/overview/',
+  TYOMC: 'https://www.marriott.com/ja/hotels/tyomc-tokyo-marriott-hotel/overview/',   // 検証済み
+  TYOAR: 'https://www.marriott.com/ja/hotels/tyoar-ac-hotel-tokyo-ginza/overview/',
+  TYOAL: 'https://www.marriott.com/ja/hotels/tyoal-aloft-tokyo-ginza/overview/',
+  TYOGZ: 'https://www.marriott.com/ja/hotels/tyogz-courtyard-tokyo-station/overview/',
+  OSAMC: 'https://www.marriott.com/ja/hotels/osamc-osaka-marriott-miyako-hotel/overview/',
+  OSAXR: 'https://www.marriott.com/ja/hotels/osaxr-the-st-regis-osaka/overview/',
+  OSAOW: 'https://www.marriott.com/ja/hotels/osaow-w-osaka/overview/',
+  OSAJW: 'https://www.marriott.com/ja/hotels/osajw-jw-marriott-hotel-nara/overview/',
+  UKYWI: 'https://www.marriott.com/ja/hotels/ukywi-the-westin-miyako-kyoto/overview/',
+  OSAWI: 'https://www.marriott.com/ja/hotels/osawi-the-westin-osaka/overview/',
+  OSAAL: 'https://www.marriott.com/ja/hotels/osaal-aloft-osaka-dojima/overview/',
+  MMJCH: 'https://www.marriott.com/ja/hotels/mmjch-courtyard-hakuba/overview/',
+  MMJKH: 'https://www.marriott.com/ja/hotels/mmjkh-karuizawa-marriott-hotel/overview/',
+  FSZIZ: 'https://www.marriott.com/ja/hotels/fsziz-izu-marriott-hotel-shuzenji/overview/',
+  MMJFJ: 'https://www.marriott.com/ja/hotels/mmjfj-fuji-marriott-hotel-lake-yamanaka/overview/',
+  MMJJJ: 'https://www.marriott.com/ja/hotels/mmjjj-matsumoto-jujo/overview/',
+  HNLOW: 'https://www.marriott.com/ja/hotels/hnlow-courtyard-waikiki-beach/overview/',
+  HNLWS: 'https://www.marriott.com/ja/hotels/hnlws-sheraton-waikiki-beach-resort/overview/',
+  HNLLC: 'https://www.marriott.com/ja/hotels/hnllc-the-royal-hawaiian-a-luxury-collection-resort-waikiki/overview/',
+  HNLAK: 'https://www.marriott.com/ja/hotels/hnlak-the-laylow-autograph-collection/overview/',
+  HNLRR: 'https://www.ritzcarlton.com/ja/hotels/hnlrr-the-ritz-carlton-residences-waikiki-beach/overview/',
+  HNLKS: 'https://www.marriott.com/ja/hotels/hnlks-sheraton-princess-kaiulani/overview/',
+  HNLWI: 'https://www.marriott.com/ja/hotels/hnlwi-moana-surfrider-a-westin-resort-and-spa-waikiki-beach/overview/',
+  HNLPW: 'https://www.marriott.com/ja/hotels/hnlpw-marriott-vacation-club-waikiki/overview/',
+  HNLMC: 'https://www.marriott.com/ja/hotels/hnlmc-waikiki-beach-marriott-resort-and-spa/overview/',
+  HNLBR: 'https://www.marriott.com/ja/hotels/hnlbr-renaissance-honolulu-hotel-and-spa/overview/',
+  HNLAC: 'https://www.marriott.com/ja/hotels/hnlac-ac-hotel-honolulu/overview/',
+  HNLRI: 'https://www.marriott.com/ja/hotels/hnlri-residence-inn-oahu-kapolei/overview/',
+  HNLKO: 'https://www.marriott.com/ja/hotels/hnlko-marriotts-ko-olina-beach-club/overview/',
+  HNLOA: 'https://www.marriott.com/ja/hotels/hnloa-courtyard-oahu-north-shore/overview/',
+  HNLKZ: 'https://www.ritzcarlton.com/ja/hotels/hnlkz-the-ritz-carlton-oahu-turtle-bay/overview/',
+  HNMMK: 'https://www.marriott.com/ja/hotels/hnmmk-courtyard-maui-kahului-airport/overview/',
+  HNMAC: 'https://www.marriott.com/ja/hotels/hnmac-ac-hotel-maui-wailea/overview/',
+  HNMRI: 'https://www.marriott.com/ja/hotels/hnmri-residence-inn-maui-wailea/overview/',
+  HNMMC: 'https://www.marriott.com/ja/hotels/hnmmc-wailea-beach-resort-marriott-maui/overview/',
+  HNMMH: 'https://www.marriott.com/ja/hotels/hnmmh-marriotts-maui-ocean-club-molokai-maui-and-lanai-towers/overview/',
+  HNMMU: 'https://www.marriott.com/ja/hotels/hnmmu-marriotts-maui-ocean-club-lahaina-and-napili-towers/overview/',
+  HNMSI: 'https://www.marriott.com/ja/hotels/hnmsi-sheraton-maui-resort-and-spa/overview/',
+  HNMWI: 'https://www.marriott.com/ja/hotels/hnmwi-the-westin-maui-resort-and-spa-kaanapali/overview/',
+  JHMRZ: 'https://www.ritzcarlton.com/ja/hotels/jhmrz-the-ritz-carlton-maui-kapalua/overview/',
+  OGGWS: 'https://www.marriott.com/ja/hotels/oggws-the-westin-kaanapali-ocean-resort-villas/overview/',
+  OGGWN: 'https://www.marriott.com/ja/hotels/oggwn-the-westin-kaanapali-ocean-resort-villas-north/overview/',
+  OGGWO: 'https://www.marriott.com/ja/hotels/oggwo-the-westin-nanea-ocean-villas-kaanapali/overview/',
+  LIHWP: 'https://www.marriott.com/ja/hotels/lihwp-the-westin-princeville-ocean-resort-villas/overview/',
+  LIHSK: 'https://www.marriott.com/ja/hotels/lihsk-sheraton-kauai-coconut-beach-resort/overview/',
+  LIHKA: 'https://www.marriott.com/ja/hotels/lihka-marriotts-kauai-beach-club/overview/',
+  LIHKN: 'https://www.marriott.com/ja/hotels/lihkn-marriotts-kauai-lagoons-kalanipuu/overview/',
+  LIHAK: 'https://www.marriott.com/ja/hotels/lihak-koloa-landing-resort-at-poipu-autograph-collection/overview/',
+  LIHWI: 'https://www.marriott.com/ja/hotels/lihwi-marriotts-waiohai-beach-club/overview/',
+  LIHSU: 'https://www.marriott.com/ja/hotels/lihsu-sheraton-kauai-resort-villas/overview/',
+  LIHSI: 'https://www.marriott.com/ja/hotels/lihsi-sheraton-kauai-resort/overview/',
+  KOACY: 'https://www.marriott.com/ja/hotels/koacy-courtyard-king-kamehamehas-kona-beach-hotel/overview/',
+  KOAMV: 'https://www.marriott.com/ja/hotels/koamv-marriotts-waikoloa-ocean-club/overview/',
+  KOAMC: 'https://www.marriott.com/ja/hotels/koamc-waikoloa-beach-marriott-resort-and-spa/overview/',
+  KOAWI: 'https://www.marriott.com/ja/hotels/koawi-the-westin-hapuna-beach-resort/overview/',
+  KOAAK: 'https://www.marriott.com/ja/hotels/koaak-mauna-kea-beach-hotel-autograph-collection/overview/',
+};
+
+/* 地域タブの表示順(日本→ハワイ)。CSVに未知の地域名が来ても末尾に自動追加されます */
+const REGION_ORDER = ['関東編','関西編','信州・富士編','沖縄編','オアフ編','マウイ編','カウアイ編','ハワイ島編'];
+/* CSVのregion_name→表示名の変換(パイプライン側の修正不要で名称を差し替えられます) */
+const REGION_ALIASES = {
+  '東京・関東編': '関東編',
+  '高原リゾート編': '信州・富士編',
+};
 
 /* ============================================================
    CSVパーサ
@@ -421,7 +573,7 @@ function dedupeLatest(objs, valueKeys){
     if(!code || !date) continue;
     const key = code+'__'+date;
     const prev = map.get(key);
-    if(!prev || String(o.checked_at||'') >= String(prev.checked_at||'')){
+    if(!prev || tsVal(o.checked_at) >= tsVal(prev.checked_at)){
       map.set(key, o);
     }
   }
@@ -439,9 +591,11 @@ function buildModel(pointObjs, cashObjs){
       hotels.set(code, {
         code,
         name: p.hotel_name || code,
-        region: p.region_name || '—',
+        region: REGION_ALIASES[p.region_name] || p.region_name || '—',
         priority: Number(p.priority_score||50),
-        url: (p.source_url && /^https?:\/\//.test(p.source_url)) ? p.source_url : `https://www.marriott.com/ja/hotels/${code.toLowerCase()}/overview/`,
+        url: HOTEL_URLS[code]
+           || ((p.source_url && /^https?:\/\//.test(p.source_url)) ? p.source_url
+           : `https://www.marriott.com/ja/hotels/${code.toLowerCase()}/overview/`),
         checkedAt: '',
         days: []
       });
@@ -456,10 +610,17 @@ function buildModel(pointObjs, cashObjs){
       cash,
       value: (pts && cash) ? cash/pts : null
     });
-    if(String(p.checked_at||'') > h.checkedAt) h.checkedAt = String(p.checked_at||'');
+    if(tsVal(p.checked_at) > tsVal(h.checkedAt)) h.checkedAt = String(p.checked_at||'');
   }
-  for(const h of hotels.values()) h.days.sort((a,b)=>a.date<b.date?-1:1);
-  return [...hotels.values()].sort((a,b)=>b.priority-a.priority);
+  // 閲覧日より前の宿泊日は全アウトプット(グラフ・狙い目・サマリー等)の対象外。当日は含む
+  const d0 = new Date();
+  const today = `${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,'0')}-${String(d0.getDate()).padStart(2,'0')}`;
+  for(const h of hotels.values()){
+    h.days = h.days.filter(d=>d.date >= today);
+    h.days.sort((a,b)=>a.date<b.date?-1:1);
+  }
+  // 残り日数ゼロのホテルはカード自体を出さない
+  return [...hotels.values()].filter(h=>h.days.length).sort((a,b)=>b.priority-a.priority);
 }
 
 /* ============================================================
@@ -469,6 +630,7 @@ let MODEL = [];
 let activeRegion = 'すべて';
 let dealOnly = false, normalOnly = false;
 let heatMode = false;   // モバイル: false=コンパクト折れ線(既定) / true=カレンダーヒートマップ
+let sortMode = 'rec';   // rec=おすすめ順 / pts=最安pt順 / days=圏内日数順
 let latestRunId = '', latestChecked = '', totalRows = 0;
 
 /* ============================================================
@@ -487,21 +649,43 @@ function tier(p){
   return 't6';
 }
 
+/* タイムスタンプの堅牢なパース:
+   - "2026-6-8 23:56" のようなゼロ埋めなし・スペース区切りも正しく解釈(Safari対策含む)
+   - タイムゾーン付き(Z/+09:00)はネイティブ解釈に委譲 */
+function parseTs(s){
+  if(!s) return null;
+  s = String(s).trim();
+  if(/[zZ]$|[+\-]\d{2}:?\d{2}$/.test(s)){
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3], +(m[4]||0), +(m[5]||0), +(m[6]||0));
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+/* 比較用エポック値(不正・空は-Infinity=最古扱い) */
+function tsVal(s){
+  const d = parseTs(s);
+  return d ? d.getTime() : -Infinity;
+}
+
 function fmtChecked(iso){
   if(!iso) return '';
-  const d = new Date(iso);
-  if(isNaN(d.getTime())) return iso.slice(0,10);
+  const d = parseTs(iso);
+  if(!d) return String(iso).slice(0,10);
   return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 function isStale(iso){
-  if(!iso) return true;
-  const d = new Date(iso);
-  return isNaN(d.getTime()) || (Date.now()-d.getTime()) > STALE_HOURS*3600*1000;
+  const d = parseTs(iso);
+  return !d || (Date.now()-d.getTime()) > STALE_HOURS*3600*1000;
 }
 
 function regions(){
   const set = new Set(MODEL.map(h=>h.region));
-  return ['すべて', ...set];
+  const known = REGION_ORDER.filter(r=>set.has(r));
+  const unknown = [...set].filter(r=>!REGION_ORDER.includes(r));
+  return ['すべて', ...known, ...unknown];
 }
 
 function renderNoteBanner(){
@@ -515,6 +699,12 @@ function renderNoteBanner(){
       <a class="nb-cta" href="${esc(NOTE_BANNER.url)}" target="_blank" rel="noopener">${esc(NOTE_BANNER.cta||'Noteで読む')} ↗</a>
     </div>`;
   });
+  // ヘッダーの筆者チップ(URLが設定されている時だけ表示)
+  const chip = document.getElementById('author-chip');
+  if(chip){
+    if(active){ chip.href = NOTE_BANNER.url; chip.classList.add('show'); }
+    else chip.classList.remove('show');
+  }
   // 凡例下の解説行(バナーURLが設定されている時だけ表示)
   const fn = document.getElementById('fna-note');
   if(fn){
@@ -544,14 +734,28 @@ function renderRunInfo(){
 
 function renderTabs(){
   const wrap = document.getElementById('region-tabs');
+  const short = isNarrow();   // モバイルは「〜編」を省いてコンパクトに
   wrap.innerHTML = '';
   for(const r of regions()){
+    const cnt = r==='すべて' ? MODEL.length : MODEL.filter(h=>h.region===r).length;
+    const label = short && r!=='すべて' ? r.replace(/編$/,'') : r;
     const b = document.createElement('button');
     b.className = 'tab' + (r===activeRegion?' active':'');
-    b.textContent = r;
+    b.innerHTML = `${esc(label)} <span class="tab-n">${cnt}</span>`;
     b.onclick = () => { activeRegion = r; render(); };
     wrap.appendChild(b);
   }
+}
+
+function minPts(h){
+  let m = Infinity;
+  for(const d of h.days) if(d.points!=null && d.points<m) m = d.points;
+  return m;
+}
+function premiumDays(h){
+  let n = 0;
+  for(const d of h.days) if(d.points!=null && d.points<=PREMIUM_FNA) n++;
+  return n;
 }
 
 function renderQuicklinks(hotels){
@@ -563,19 +767,59 @@ function renderQuicklinks(hotels){
     return;
   }
   wrap.classList.add('show');
-  wrap.innerHTML = hotels.map(h=>
-    `<a class="qlink" href="#hotel-${esc(h.code)}">${esc(h.name)}</a>`
-  ).join('');
+
+  // ホテルへ移動(カテゴリ別グループ+最安pt併記)
+  const groups = CATEGORY_DEFS
+    .map(c=>({key:c.key, label:c.label, items:[]}))
+    .sort((a,b)=>CATEGORY_ORDER[a.key]-CATEGORY_ORDER[b.key]);
+  for(const h of hotels){
+    groups.find(g=>g.key===categorize(h)).items.push(h);
+  }
+  const sel = document.createElement('select');
+  sel.className = 'qselect';
+  sel.setAttribute('aria-label', 'ホテルへ移動');
+  sel.innerHTML =
+    `<option value="">ホテルへ移動…(${hotels.length}軒)</option>` +
+    groups.filter(g=>g.items.length).map(g=>
+      `<optgroup label="${esc(g.label)} (${g.items.length})">` +
+      g.items.map(h=>{
+        const p = minPts(h);
+        return `<option value="${esc(h.code)}">${esc(h.name)} ─ ${p===Infinity?'空室なし':fmt(p)+'pt〜'}</option>`;
+      }).join('') +
+      `</optgroup>`
+    ).join('');
+  sel.onchange = ()=>{
+    const code = sel.value;
+    if(!code) return;
+    const el = document.getElementById('hotel-'+code);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+    sel.value = '';
+  };
+
+  // 並び替え
+  const sort = document.createElement('select');
+  sort.className = 'qselect qsort';
+  sort.setAttribute('aria-label', '並び替え');
+  sort.innerHTML = [
+    ['rec','おすすめ順'],
+    ['pts','最安pt順'],
+    ['days','圏内日数順'],
+  ].map(([v,l])=>`<option value="${v}"${v===sortMode?' selected':''}>${l}</option>`).join('');
+  sort.onchange = ()=>{ sortMode = sort.value; render(); };
+
+  wrap.innerHTML = '';
+  wrap.appendChild(sel);
+  wrap.appendChild(sort);
 }
 
 function renderSummary(hotels){
-  let nDays=0, pDays=0, avail=0, minP=Infinity, minHotel='', minCode='', minDate='', bestVal=0, bestValTxt='';
+  let nDays=0, pDays=0, avail=0, minP=Infinity, minHotel='', bestVal=0, bestValTxt='';
   for(const h of hotels) for(const d of h.days){
     if(d.points==null) continue;
     avail++;
     if(d.points<=NORMAL_FNA) nDays++;
     if(d.points<=PREMIUM_FNA) pDays++;
-    if(d.points<minP){ minP=d.points; minHotel=h.name; minCode=h.code; minDate=d.date; }
+    if(d.points<minP){ minP=d.points; minHotel=h.name; }
     if(d.value && d.value>bestVal && d.points<=PREMIUM_FNA){ bestVal=d.value; bestValTxt=`${d.value.toFixed(2)}円/pt`; }
   }
   document.getElementById('summary').innerHTML = `<div class="summary-inner">
@@ -585,26 +829,6 @@ function renderSummary(hotels){
     <div><div class="label">最安 ${esc(minHotel? '('+minHotel.slice(0,10)+'…)':'')}</div><div class="val v-deal">${minP===Infinity?'—':fmt(minP)}<small>pt</small></div></div>
     ${bestValTxt?`<div><div class="label">最高バリュー(≤10万pt)</div><div class="val v-deal">${bestValTxt}</div></div>`:''}
   </div>`;
-
-  // いま一番の狙い目(無料宿泊券圏内の最安日) — タップで該当ホテルへ
-  const hl = document.getElementById('highlight');
-  if(hl){
-    if(pDays>0 && minDate){
-      const wd = ['日','月','火','水','木','金','土'][new Date(minDate+'T00:00:00').getDay()];
-      const badge = minP<=NORMAL_FNA ? '◎通常圏内' : '○Premium圏内';
-      hl.classList.add('show');
-      hl.innerHTML = `<a href="#hotel-${esc(minCode)}">
-        <span class="hl-mark">BEST ── いま一番の狙い目</span>
-        <span class="hl-date">${esc(minDate)}(${wd})</span>
-        <span class="hl-name">${esc(minHotel)}</span>
-        <span class="hl-pt">${fmt(minP)} pt <small>${badge}</small></span>
-        <span class="hl-arrow">↓</span>
-      </a>`;
-    }else{
-      hl.classList.remove('show');
-      hl.innerHTML = '';
-    }
-  }
 }
 
 function monthHasDeal(days, threshold){
@@ -952,6 +1176,7 @@ function renderHotels(hotels){
     const min = avail.length ? avail.reduce((a,b)=>a.points<=b.points?a:b) : null;
     const stale = isStale(h.checkedAt);
 
+    const cat = CATEGORY_DEFS.find(c=>c.key===categorize(h));
     const card = document.createElement('section');
     card.className = 'hotel';
     card.id = 'hotel-' + h.code;
@@ -959,6 +1184,7 @@ function renderHotels(hotels){
       <div class="hotel-head">
         <div><span class="hotel-name"><a href="${esc(h.url)}" target="_blank" rel="noopener">${esc(h.name)}</a></span><span class="hotel-code">${esc(h.code)}</span></div>
         <div class="hotel-meta">
+          <span class="cat-badge cat-${cat.cls}">${esc(cat.label)}</span>
           <span>${esc(h.region)}</span>
           <span class="fresh${stale?' stale':''}">取得 ${esc(fmtChecked(h.checkedAt)||'—')}</span>
         </div>
@@ -1002,7 +1228,7 @@ function renderHotels(hotels){
       dealsEl.innerHTML = '<div class="deals-empty">空室のある日がありません。</div>';
     }else{
       const dow = ['日','月','火','水','木','金','土'];
-      dealsEl.innerHTML = top.map((d,i)=>{
+      const rowsHtml = top.map((d,i)=>{
         const wd = new Date(d.date+'T00:00:00').getDay();
         const isWknd = wd===0||wd===6;
         const inN = d.points<=NORMAL_FNA, inP = d.points<=PREMIUM_FNA;
@@ -1015,7 +1241,19 @@ function renderHotels(hotels){
           <span class="deal-tagwrap">${badge}</span>
           <span class="deal-pts ${ptsCls}">${fmt(d.points)}<small style="font-weight:400"> pt</small>${cash}</span>
         </div>`;
-      }).join('');
+      });
+      // 上位3日+残りは開閉式(PC/スマホ共通)。残り1日だけなら畳まず全件表示
+      const VISIBLE = 3;
+      if(rowsHtml.length > VISIBLE + 1){
+        dealsEl.innerHTML =
+          rowsHtml.slice(0, VISIBLE).join('') +
+          `<details class="deal-more">
+            <summary><span class="more">＋ 残り${rowsHtml.length - VISIBLE}日を表示</span><span class="less">− 閉じる</span></summary>
+            ${rowsHtml.slice(VISIBLE).join('')}
+          </details>`;
+      }else{
+        dealsEl.innerHTML = rowsHtml.join('');
+      }
     }
     // 公式ページリンク
     const link = document.createElement('a');
@@ -1044,12 +1282,14 @@ function renderHotels(hotels){
 
 function render(){
   const regionHotels = activeRegion==='すべて' ? MODEL : MODEL.filter(h=>h.region===activeRegion);
-  const hotels = regionHotels.filter(h=>{
+  let hotels = regionHotels.filter(h=>{
     const avail = h.days.filter(d=>d.points!=null);
     if(dealOnly && !avail.some(d=>d.points<=PREMIUM_FNA)) return false;
     if(normalOnly && !avail.some(d=>d.points<=NORMAL_FNA)) return false;
     return true;
   });
+  if(sortMode==='pts') hotels = [...hotels].sort((a,b)=>minPts(a)-minPts(b));
+  else if(sortMode==='days') hotels = [...hotels].sort((a,b)=>premiumDays(b)-premiumDays(a));
   renderNoteBanner();
   renderRunInfo();
   renderTabs();
@@ -1150,26 +1390,32 @@ document.getElementById('t-heat').addEventListener('change', e=>{
 });
 
 /* ============================================================
-   起動: 埋め込みデータを読んで描画(外部通信なし)
+   起動: 公開CSVを取得して描画
 ============================================================ */
-function boot(){
+async function fetchCSV(url){
+  const res = await fetch(url, {redirect:'follow'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return rowsToObjects(parseCSV(await res.text()));
+}
+
+async function boot(){
   const info = document.getElementById('runinfo');
-  if(!RAW_POINTS_CSV.trim()){
+  if(!POINTS_CSV_URL){
     info.textContent = 'データ未接続';
     document.getElementById('setup-panel').style.display = 'block';
     document.getElementById('summary').innerHTML = '';
     return;
   }
   try{
-    const pointObjs = rowsToObjects(parseCSV(RAW_POINTS_CSV));
+    const pointObjs = await fetchCSV(POINTS_CSV_URL);
     let cashObjs = null;
-    if(RAW_CASH_CSV.trim()){
-      try{ cashObjs = rowsToObjects(parseCSV(RAW_CASH_CSV)); }
-      catch(e){ console.warn('価格データの解析に失敗(ポイントのみで表示):', e); }
+    if(CASH_CSV_URL){
+      try{ cashObjs = await fetchCSV(CASH_CSV_URL); }
+      catch(e){ console.warn('価格CSVの読み込みに失敗(ポイントのみで表示):', e); }
     }
     MODEL = buildModel(pointObjs, cashObjs);
-    totalRows = pointObjs.length;
-    latestChecked = pointObjs.reduce((m,o)=>String(o.checked_at||'')>m?String(o.checked_at):m, '');
+    totalRows = MODEL.reduce((s,h)=>s+h.days.length, 0);   // 除外後の実表示日数
+    latestChecked = pointObjs.reduce((m,o)=> tsVal(o.checked_at)>tsVal(m) ? String(o.checked_at) : m, '');
     latestRunId = (pointObjs.find(o=>String(o.checked_at||'')===latestChecked)||{}).run_id || '';
     if(!MODEL.length){
       document.getElementById('hotels').innerHTML =
@@ -1182,7 +1428,7 @@ function boot(){
     info.textContent = '読み込みエラー';
     document.getElementById('hotels').innerHTML =
       `<div class="state-msg"><div class="big">データを読み込めませんでした</div>
-       ${esc(err.message)}</div>`;
+       ${esc(err.message)}<br>スプレッドシートの「ウェブに公開」が有効か確認してください。</div>`;
   }
 }
 
