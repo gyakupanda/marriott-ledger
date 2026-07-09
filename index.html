@@ -326,12 +326,11 @@
 
 <div id="setup-panel" style="display:none" class="setup">
   <b>初期設定(サイト管理者向け)</b>
-  <p style="margin-top:8px">データ接続が未設定です。以下の手順で公開CSVのURLをこのファイルに埋め込んでください。</p>
+  <p style="margin-top:8px">データ接続が未設定です。GitHub Actionsでビルドする場合は、Secretsに <code>SHEET_ID</code> / <code>POINTS_GID</code> / <code>CASH_GID</code> を設定し、<code>build.py</code> でCSVを埋め込んでください。</p>
   <ol>
-    <li>Googleスプレッドシートで「ファイル → 共有 → ウェブに公開」</li>
-    <li>対象を「<b>Marriott_Raw</b>」タブ、形式を「カンマ区切り形式(.csv)」にして公開し、URLをコピー</li>
-    <li>この index.html 内の <code>POINTS_CSV_URL</code> にそのURLを貼る</li>
-    <li>(任意)同様に「Marriott_Raw_Cash」タブのURLを <code>CASH_CSV_URL</code> に貼ると価格も表示されます</li>
+    <li>通常運用: <code>build.py</code> が <code>RAW_POINTS_CSV</code> / <code>RAW_CASH_CSV</code> にCSVを自動埋め込みします</li>
+    <li>手動運用: GoogleスプレッドシートをCSV公開し、<code>POINTS_CSV_URL</code> / <code>CASH_CSV_URL</code> にURLを貼ることでも表示できます</li>
+    <li>HTML内の <code>__POINTS_DATA_START__</code> などのマーカーは、ビルド時の差し込み位置なので削除しないでください</li>
   </ol>
 </div>
 
@@ -353,6 +352,15 @@
 ============================================================ */
 const POINTS_CSV_URL = '';   // ← 必須: Marriott_RawのCSV公開URL
 const CASH_CSV_URL   = '';   // ← 任意: Marriott_Raw_CashのCSV公開URL(価格・円/pt表示が有効になる)
+
+/* GitHub Actions build.py がここへCSVを埋め込みます。マーカー文字列は変更・削除しないでください。 */
+/*__POINTS_DATA_START__*/
+const RAW_POINTS_CSV = ``;
+/*__POINTS_DATA_END__*/
+
+/*__CASH_DATA_START__*/
+const RAW_CASH_CSV = ``;
+/*__CASH_DATA_END__*/
 
 /* ---- Note導線(マネタイズ) ----
    NOTE_BANNER: サイト上部の帯。全ページ共通。text を空にすると非表示
@@ -1398,21 +1406,36 @@ async function fetchCSV(url){
   return rowsToObjects(parseCSV(await res.text()));
 }
 
+function parseEmbeddedCSV(csvText){
+  return rowsToObjects(parseCSV(csvText));
+}
+
 async function boot(){
   const info = document.getElementById('runinfo');
-  if(!POINTS_CSV_URL){
-    info.textContent = 'データ未接続';
-    document.getElementById('setup-panel').style.display = 'block';
-    document.getElementById('summary').innerHTML = '';
-    return;
-  }
+
   try{
-    const pointObjs = await fetchCSV(POINTS_CSV_URL);
+    const hasEmbeddedPoints = typeof RAW_POINTS_CSV !== 'undefined' && RAW_POINTS_CSV.trim();
+    const hasEmbeddedCash = typeof RAW_CASH_CSV !== 'undefined' && RAW_CASH_CSV.trim();
+
+    if(!hasEmbeddedPoints && !POINTS_CSV_URL){
+      info.textContent = 'データ未接続';
+      document.getElementById('setup-panel').style.display = 'block';
+      document.getElementById('summary').innerHTML = '';
+      return;
+    }
+
+    const pointObjs = hasEmbeddedPoints
+      ? parseEmbeddedCSV(RAW_POINTS_CSV)
+      : await fetchCSV(POINTS_CSV_URL);
+
     let cashObjs = null;
-    if(CASH_CSV_URL){
+    if(hasEmbeddedCash){
+      cashObjs = parseEmbeddedCSV(RAW_CASH_CSV);
+    }else if(CASH_CSV_URL){
       try{ cashObjs = await fetchCSV(CASH_CSV_URL); }
       catch(e){ console.warn('価格CSVの読み込みに失敗(ポイントのみで表示):', e); }
     }
+
     MODEL = buildModel(pointObjs, cashObjs);
     totalRows = MODEL.reduce((s,h)=>s+h.days.length, 0);   // 除外後の実表示日数
     latestChecked = pointObjs.reduce((m,o)=> tsVal(o.checked_at)>tsVal(m) ? String(o.checked_at) : m, '');
@@ -1428,7 +1451,7 @@ async function boot(){
     info.textContent = '読み込みエラー';
     document.getElementById('hotels').innerHTML =
       `<div class="state-msg"><div class="big">データを読み込めませんでした</div>
-       ${esc(err.message)}<br>スプレッドシートの「ウェブに公開」が有効か確認してください。</div>`;
+       ${esc(err.message)}<br>GitHub ActionsのSecrets、シート共有設定、またはCSV公開URLを確認してください。</div>`;
   }
 }
 
