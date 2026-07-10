@@ -51,6 +51,14 @@
   .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
   .tab:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
   .toggle{display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;user-select:none;padding:7px 12px;border:1px solid var(--line);background:#fff;border-radius:2px}
+  .ctrl-group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .ctrl-group + .ctrl-group{border-left:1px solid var(--line);padding-left:18px;margin-left:6px}
+  .ctrl-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ink-soft);text-transform:uppercase;margin-right:2px}
+  .seg{display:flex}
+  .seg .tab{padding:7px 13px;border-radius:0}
+  .seg .tab:first-child{border-radius:2px 0 0 2px}
+  .seg .tab:last-child{border-radius:0 2px 2px 0}
+  .seg .tab + .tab{border-left:none}
   .toggle input{accent-color:var(--deal);width:14px;height:14px;cursor:pointer}
   .toggle.on{border-color:var(--deal);background:var(--deal-bg);color:var(--deal);font-weight:500}
   .toggle.m-only{display:none}
@@ -247,6 +255,7 @@
     #region-tabs{flex-wrap:wrap;gap:6px;padding-top:10px;padding-bottom:6px}
     .tab{flex:0 0 auto;padding:8px 13px;font-size:13px}
     .toggle{padding:10px 12px;font-size:13px}
+    .ctrl-group + .ctrl-group{border-left:none;padding-left:0;margin-left:0}
     .toggle.m-only{display:flex}
 
     /* ホテルジャンプ: セレクトを全幅に */
@@ -297,22 +306,29 @@
 <div class="quicklinks" id="hotel-quicklinks"></div>
 
 <div class="controls" style="padding-top:0">
-  <label class="toggle" id="t-deal-wrap">
-    <input type="checkbox" id="t-deal">
-    10万pt以下がある月のみ
-  </label>
-  <label class="toggle" id="t-normal-wrap">
-    <input type="checkbox" id="t-normal">
-    7.5万pt以下がある月のみ
-  </label>
-  <label class="toggle m-only" id="t-heat-wrap">
-    <input type="checkbox" id="t-heat">
-    カレンダー表示
-  </label>
-  <label class="toggle" id="t-value-wrap">
-    <input type="checkbox" id="t-value">
-    単価(円/pt)グラフ
-  </label>
+  <div class="ctrl-group">
+    <span class="ctrl-label">絞り込み</span>
+    <label class="toggle" id="t-deal-wrap">
+      <input type="checkbox" id="t-deal">
+      10万pt以下がある月のみ
+    </label>
+    <label class="toggle" id="t-normal-wrap">
+      <input type="checkbox" id="t-normal">
+      7.5万pt以下がある月のみ
+    </label>
+  </div>
+  <div class="ctrl-group">
+    <span class="ctrl-label">表示</span>
+    <div class="seg" id="metric-seg" role="group" aria-label="グラフの表示切替">
+      <button type="button" class="tab active" data-m="points">ポイント</button>
+      <button type="button" class="tab" data-m="cash">価格(円)</button>
+      <button type="button" class="tab" data-m="value">単価(円/pt)</button>
+    </div>
+    <label class="toggle m-only" id="t-heat-wrap">
+      <input type="checkbox" id="t-heat">
+      カレンダー表示
+    </label>
+  </div>
 </div>
 
 <div class="legend">
@@ -647,7 +663,7 @@ let MODEL = [];
 let activeRegion = 'すべて';
 let dealOnly = false, normalOnly = false;
 let heatMode = false;
-let chartMetric = 'points';   // 'points'=ポイント推移(+現金右軸) / 'value'=単価(円/pt)推移。現金データが無いホテルはポイント表示に自動フォールバック   // モバイル: false=コンパクト折れ線(既定) / true=カレンダーヒートマップ
+let chartMetric = 'points';   // 'points'=ポイント主役+現金併記 / 'cash'=価格主役+ポイント併記 / 'value'=単価(円/pt)。データ不足時はポイント表示に自動フォールバック   // モバイル: false=コンパクト折れ線(既定) / true=カレンダーヒートマップ
 let sortMode = 'rec';   // rec=おすすめ順 / pts=最安pt順 / days=圏内日数順
 let latestRunId = '', latestChecked = '', totalRows = 0;
 
@@ -868,10 +884,13 @@ function buildLineChart(days, metric='points'){
   const W = 1120;
   const H = 420;
   const valueMode = metric==='value';
-  const val = d => valueMode ? d.value : d.points;
-  const cashVals = days.map(d=>d.cash).filter(c=>c!=null);
-  const hasCash = !valueMode && cashVals.length>0;   // 現金オーバーレイはポイントモード時のみ
-  const padL = 66, padR = hasCash ? 68 : 20, padT = 24, padB = 46;
+  const cashMain  = metric==='cash';
+  const val = d => valueMode ? d.value : cashMain ? d.cash : d.points;          // 主役の系列(左軸・実線)
+  const ovVal = metric==='points' ? (d=>d.cash) : cashMain ? (d=>d.points) : null;  // 併記の系列(右軸・破線)
+  const ovVals = ovVal ? days.map(ovVal).filter(v=>v!=null) : [];
+  const hasOv = ovVals.length>0;
+  const ovFmt = cashMain ? (v=>(v/1000)+'k') : (v=>'¥'+(v/1000)+'k');
+  const padL = 66, padR = hasOv ? 68 : 20, padT = 24, padB = 46;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
@@ -885,12 +904,16 @@ function buildLineChart(days, metric='points'){
     return svg;
   }
 
-  // Y軸レンジ: ポイント=閾値(7.5万/10万)込みで万単位丸め / 単価=等価1.0込みで0.1刻み丸め
+  // Y軸レンジ: ポイント=閾値(7.5万/10万)込み / 価格=データ範囲 / 単価=等価1.0込みで0.1刻み
   let lo, hi;
   if(valueMode){
     lo = Math.floor(Math.min(...valid, 1.0)*10)/10;
     hi = Math.ceil(Math.max(...valid, 1.0)*10)/10;
     if(hi===lo) hi = lo + 0.1;
+  }else if(cashMain){
+    lo = Math.floor(Math.min(...valid)/10000)*10000;
+    hi = Math.ceil(Math.max(...valid)/10000)*10000;
+    if(hi===lo) hi = lo + 10000;
   }else{
     lo = Math.floor(Math.min(...valid, NORMAL_FNA)/10000)*10000;
     hi = Math.ceil(Math.max(...valid, PREMIUM_FNA)/10000)*10000;
@@ -901,11 +924,11 @@ function buildLineChart(days, metric='points'){
   const x = i => padL + (n<=1 ? plotW/2 : (i/(n-1))*plotW);
   const y = p => padT + plotH - ((p-lo)/(hi-lo))*plotH;
 
-  // 現金(円)用の右軸スケール
+  // 併記系列用の右軸スケール
   let lo2 = 0, hi2 = 0, y2 = null;
-  if(hasCash){
-    lo2 = Math.floor(Math.min(...cashVals)/10000)*10000;
-    hi2 = Math.ceil(Math.max(...cashVals)/10000)*10000;
+  if(hasOv){
+    lo2 = Math.floor(Math.min(...ovVals)/10000)*10000;
+    hi2 = Math.ceil(Math.max(...ovVals)/10000)*10000;
     if(hi2===lo2) hi2 = lo2 + 10000;
     y2 = c => padT + plotH - ((c-lo2)/(hi2-lo2))*plotH;
   }
@@ -916,11 +939,11 @@ function buildLineChart(days, metric='points'){
     const yy = y(v);
     svg.appendChild(svgEl('line', {x1:padL, y1:yy, x2:W-padR, y2:yy, class:'grid'}));
     const t = svgEl('text', {x:padL-6, y:yy+3, 'text-anchor':'end', class:'ylabel'});
-    t.textContent = valueMode ? v.toFixed(1) : (v/1000)+'k';
+    t.textContent = valueMode ? v.toFixed(1) : cashMain ? '¥'+(v/1000)+'k' : (v/1000)+'k';
     svg.appendChild(t);
   }
 
-  // 閾値ライン(ポイント: 75k/100k / 単価: 等価1.0円/pt)
+  // 閾値ライン(ポイント: 75k/100k / 単価: 等価1.0円/pt / 価格: なし)
   if(valueMode){
     if(1.0>=lo && 1.0<=hi){
       svg.appendChild(svgEl('line', {x1:padL, y1:y(1.0), x2:W-padR, y2:y(1.0), class:'thr-premium'}));
@@ -928,7 +951,7 @@ function buildLineChart(days, metric='points'){
       t.textContent = '等価 1.0円/pt';
       svg.appendChild(t);
     }
-  }else{
+  }else if(!cashMain){
   if(NORMAL_FNA>=lo && NORMAL_FNA<=hi){
     svg.appendChild(svgEl('line', {x1:padL, y1:y(NORMAL_FNA), x2:W-padR, y2:y(NORMAL_FNA), class:'thr-normal'}));
     const t = svgEl('text', {x:W-padR, y:y(NORMAL_FNA)-3, 'text-anchor':'end', class:'thr-tag n'});
@@ -958,18 +981,19 @@ function buildLineChart(days, metric='points'){
     }
   });
 
-  // 現金(円): 右軸ラベル + 破線ライン(ポイント線の下層に描く)
-  if(hasCash){
+  // 併記系列: 右軸ラベル + 破線ライン(主役線の下層に描く)
+  if(hasOv){
     const step2 = Math.max(10000, Math.ceil((hi2-lo2)/5/10000)*10000);
     for(let v=lo2; v<=hi2; v+=step2){
       const t = svgEl('text', {x:W-padR+8, y:y2(v)+3, 'text-anchor':'start', class:'ylabel cash'});
-      t.textContent = '¥'+(v/1000)+'k';
+      t.textContent = ovFmt(v);
       svg.appendChild(t);
     }
     let cseg = [];
     const csegs = [];
     days.forEach((d,i)=>{
-      if(d.cash!=null) cseg.push([x(i), y2(d.cash)]);
+      const ov = ovVal(d);
+      if(ov!=null) cseg.push([x(i), y2(ov)]);
       else if(cseg.length){ csegs.push(cseg); cseg=[]; }
     });
     if(cseg.length) csegs.push(cseg);
@@ -978,13 +1002,15 @@ function buildLineChart(days, metric='points'){
       svg.appendChild(svgEl('path', {d:cl, class:'cline'}));
     }
     // 凡例(左上)
+    const mainLabel = cashMain ? '現金(円)' : 'ポイント';
+    const ovLabel   = cashMain ? 'ポイント' : '現金(円)';
     svg.appendChild(svgEl('line', {x1:padL+8, y1:padT+2, x2:padL+30, y2:padT+2, class:'pline'}));
     let lt = svgEl('text', {x:padL+35, y:padT+6, class:'lg-label'});
-    lt.textContent = 'ポイント';
+    lt.textContent = mainLabel;
     svg.appendChild(lt);
     svg.appendChild(svgEl('line', {x1:padL+100, y1:padT+2, x2:padL+122, y2:padT+2, class:'cline'}));
     lt = svgEl('text', {x:padL+127, y:padT+6, class:'lg-label'});
-    lt.textContent = '現金(円)';
+    lt.textContent = ovLabel;
     svg.appendChild(lt);
   }
 
@@ -1007,20 +1033,26 @@ function buildLineChart(days, metric='points'){
     svg.appendChild(svgEl('path', {d:line, class:'pline'}));
   }
 
-  // ドット(ポイント: 圏内色付け / 単価: 等価1.0以上を色付け)+ ホバー領域
+  // ドット(ポイント: 圏内色付け / 価格: 素点 / 単価: 等価1.0以上を色付け)+ ホバー領域
   days.forEach((d,i)=>{
     const v0 = val(d);
     if(v0==null) return;
-    const cls = valueMode
-      ? (v0>=1.0 ? 'pdot d-premium' : 'pdot')
+    const cls = valueMode ? (v0>=1.0 ? 'pdot d-premium' : 'pdot')
+      : cashMain ? 'pdot'
       : (d.points<=NORMAL_FNA ? 'pdot d-normal' : d.points<=PREMIUM_FNA ? 'pdot d-premium' : 'pdot');
-    const r = valueMode ? (v0>=1.0 ? 4 : 2.8) : (d.points<=PREMIUM_FNA ? 4 : 2.8);
+    const r = valueMode ? (v0>=1.0 ? 4 : 2.8) : cashMain ? 2.8 : (d.points<=PREMIUM_FNA ? 4 : 2.8);
     svg.appendChild(svgEl('circle', {cx:x(i), cy:y(v0), r, class:cls}));
     // ホバー用の透明な縦帯
     const hit = svgEl('rect', {x:x(i)-4, y:padT, width:8, height:plotH, class:'hit'});
-    let tip = d.date + '\n' + fmt(d.points)+' pt';
-    if(d.points<=NORMAL_FNA) tip += ' ◎通常圏内';
-    else if(d.points<=PREMIUM_FNA) tip += ' ○Premium圏内';
+    const wd = ['日','月','火','水','木','金','土'][new Date(d.date+'T00:00:00').getDay()];
+    let tip = `${d.date}(${wd})`;
+    if(d.points!=null){
+      tip += '\n' + fmt(d.points)+' pt';
+      if(d.points<=NORMAL_FNA) tip += ' ◎通常圏内';
+      else if(d.points<=PREMIUM_FNA) tip += ' ○Premium圏内';
+    }else{
+      tip += '\nポイント空室なし';
+    }
     if(d.cash) tip += '\n¥'+fmt(d.cash) + (d.value?` (${d.value.toFixed(2)}円/pt)`:'');
     hit.dataset.tip = tip;
     svg.appendChild(hit);
@@ -1037,10 +1069,13 @@ function buildLineChart(days, metric='points'){
 function buildCompactLineChart(days, metric='points'){
   const W = 360, H = 250;
   const valueMode = metric==='value';
-  const val = d => valueMode ? d.value : d.points;
-  const cashVals = days.map(d=>d.cash).filter(c=>c!=null);
-  const hasCash = !valueMode && cashVals.length>0;
-  const padL = 40, padR = hasCash ? 46 : 10, padT = 16, padB = 26;
+  const cashMain  = metric==='cash';
+  const val = d => valueMode ? d.value : cashMain ? d.cash : d.points;
+  const ovVal = metric==='points' ? (d=>d.cash) : cashMain ? (d=>d.points) : null;
+  const ovVals = ovVal ? days.map(ovVal).filter(v=>v!=null) : [];
+  const hasOv = ovVals.length>0;
+  const ovFmt = cashMain ? (v=>(v/1000)+'k') : (v=>'¥'+(v/1000)+'k');
+  const padL = 40, padR = hasOv ? 46 : 10, padT = 16, padB = 26;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
@@ -1060,6 +1095,10 @@ function buildCompactLineChart(days, metric='points'){
     lo = Math.floor(Math.min(...valid, 1.0)*10)/10;
     hi = Math.ceil(Math.max(...valid, 1.0)*10)/10;
     if(hi===lo) hi = lo + 0.1;
+  }else if(cashMain){
+    lo = Math.floor(Math.min(...valid)/10000)*10000;
+    hi = Math.ceil(Math.max(...valid)/10000)*10000;
+    if(hi===lo) hi = lo + 10000;
   }else{
     lo = Math.floor(Math.min(...valid, NORMAL_FNA)/10000)*10000;
     hi = Math.ceil(Math.max(...valid, PREMIUM_FNA)/10000)*10000;
@@ -1070,11 +1109,11 @@ function buildCompactLineChart(days, metric='points'){
   const x = i => padL + (n<=1 ? plotW/2 : (i/(n-1))*plotW);
   const y = p => padT + plotH - ((p-lo)/(hi-lo))*plotH;
 
-  // 現金(円)用の右軸スケール
+  // 併記系列用の右軸スケール
   let lo2 = 0, hi2 = 0, y2 = null;
-  if(hasCash){
-    lo2 = Math.floor(Math.min(...cashVals)/10000)*10000;
-    hi2 = Math.ceil(Math.max(...cashVals)/10000)*10000;
+  if(hasOv){
+    lo2 = Math.floor(Math.min(...ovVals)/10000)*10000;
+    hi2 = Math.ceil(Math.max(...ovVals)/10000)*10000;
     if(hi2===lo2) hi2 = lo2 + 10000;
     y2 = c => padT + plotH - ((c-lo2)/(hi2-lo2))*plotH;
   }
@@ -1085,11 +1124,11 @@ function buildCompactLineChart(days, metric='points'){
     const yy = y(v);
     svg.appendChild(svgEl('line', {x1:padL, y1:yy, x2:W-padR, y2:yy, class:'grid'}));
     const t = svgEl('text', {x:padL-5, y:yy+3, 'text-anchor':'end', class:'ylabel'});
-    t.textContent = valueMode ? v.toFixed(1) : (v/1000)+'k';
+    t.textContent = valueMode ? v.toFixed(1) : cashMain ? '¥'+(v/1000)+'k' : (v/1000)+'k';
     svg.appendChild(t);
   }
 
-  // 閾値ライン(短縮タグ / 単価モードは等価1.0)
+  // 閾値ライン(短縮タグ / 単価=等価1.0 / 価格=なし)
   if(valueMode){
     if(1.0>=lo && 1.0<=hi){
       svg.appendChild(svgEl('line', {x1:padL, y1:y(1.0), x2:W-padR, y2:y(1.0), class:'thr-premium'}));
@@ -1097,7 +1136,7 @@ function buildCompactLineChart(days, metric='points'){
       t.textContent = '1.0';
       svg.appendChild(t);
     }
-  }else{
+  }else if(!cashMain){
   if(NORMAL_FNA>=lo && NORMAL_FNA<=hi){
     svg.appendChild(svgEl('line', {x1:padL, y1:y(NORMAL_FNA), x2:W-padR, y2:y(NORMAL_FNA), class:'thr-normal'}));
     const t = svgEl('text', {x:W-padR, y:y(NORMAL_FNA)-3, 'text-anchor':'end', class:'thr-tag n'});
@@ -1128,18 +1167,19 @@ function buildCompactLineChart(days, metric='points'){
     }
   });
 
-  // 現金(円): 右軸ラベル + 破線ライン(ポイント線の下層に描く)
-  if(hasCash){
+  // 併記系列: 右軸ラベル + 破線ライン(主役線の下層に描く)
+  if(hasOv){
     const step2 = Math.max(10000, Math.ceil((hi2-lo2)/3/10000)*10000);
     for(let v=lo2; v<=hi2; v+=step2){
       const t = svgEl('text', {x:W-padR+5, y:y2(v)+3, 'text-anchor':'start', class:'ylabel cash'});
-      t.textContent = '¥'+(v/1000)+'k';
+      t.textContent = ovFmt(v);
       svg.appendChild(t);
     }
     let cseg = [];
     const csegs = [];
     days.forEach((d,i)=>{
-      if(d.cash!=null) cseg.push([x(i), y2(d.cash)]);
+      const ov = ovVal(d);
+      if(ov!=null) cseg.push([x(i), y2(ov)]);
       else if(cseg.length){ csegs.push(cseg); cseg=[]; }
     });
     if(cseg.length) csegs.push(cseg);
@@ -1147,10 +1187,10 @@ function buildCompactLineChart(days, metric='points'){
       const cl = s.map((p,j)=>`${j?'L':'M'} ${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(' ');
       svg.appendChild(svgEl('path', {d:cl, class:'cline'}));
     }
-    // ミニ凡例(左上・現金のみ。ポイント線は主役で自明のため)
+    // ミニ凡例(左上・併記側のみ。主役線は自明のため)
     svg.appendChild(svgEl('line', {x1:padL+4, y1:8, x2:padL+20, y2:8, class:'cline'}));
     const lt = svgEl('text', {x:padL+24, y:11, class:'lg-label'});
-    lt.textContent = '現金(¥)';
+    lt.textContent = cashMain ? 'ポイント(pt)' : '現金(¥)';
     svg.appendChild(lt);
   }
 
@@ -1173,9 +1213,10 @@ function buildCompactLineChart(days, metric='points'){
     svg.appendChild(svgEl('path', {d:line, class:'pline'}));
   }
 
-  // ドットは狙い目の日のみ(200日全打ちは潰れるため / 単価モードは等価1.0以上)
+  // ドットは狙い目の日のみ(200日全打ちは潰れるため / 単価=等価1.0以上 / 価格=なし)
   days.forEach((d,i)=>{
     const v0 = val(d);
+    if(cashMain) return;
     if(valueMode){
       if(v0==null || v0<1.0) return;
       svg.appendChild(svgEl('circle', {cx:x(i), cy:y(v0), r:3, class:'pdot d-premium'}));
@@ -1202,9 +1243,14 @@ function buildCompactLineChart(days, metric='points'){
     if(best < 0) return;
     const d = days[best];
     const wd = ['日','月','火','水','木','金','土'][new Date(d.date+'T00:00:00').getDay()];
-    let tipText = `${d.date}(${wd})\n${fmt(d.points)} pt`;
-    if(d.points<=NORMAL_FNA) tipText += ' ◎通常圏内';
-    else if(d.points<=PREMIUM_FNA) tipText += ' ○Premium圏内';
+    let tipText = `${d.date}(${wd})`;
+    if(d.points!=null){
+      tipText += `\n${fmt(d.points)} pt`;
+      if(d.points<=NORMAL_FNA) tipText += ' ◎通常圏内';
+      else if(d.points<=PREMIUM_FNA) tipText += ' ○Premium圏内';
+    }else{
+      tipText += '\nポイント空室なし';
+    }
     if(d.cash) tipText += '\n¥'+fmt(d.cash) + (d.value?` (${d.value.toFixed(2)}円/pt)`:'');
     overlay.dataset.tip = tipText;   // 直後にバブルするdocumentのclickハンドラが表示する
     marker.setAttribute('cx', x(best).toFixed(1));
@@ -1306,7 +1352,9 @@ function renderHotels(hotels){
   grid.className = 'hotel-grid';
   let shown = 0;
   for(const h of hotels){
-    const useValue = chartMetric==='value' && h.days.some(d=>d.value!=null);
+    let chartMode = chartMetric;
+    if(chartMode==='cash' && !h.days.some(d=>d.cash!=null)) chartMode='points';
+    if(chartMode==='value' && !h.days.some(d=>d.value!=null)) chartMode='points';
     const avail = h.days.filter(d=>d.points!=null);
     const pDeals = avail.filter(d=>d.points<=PREMIUM_FNA);
     const nDeals = avail.filter(d=>d.points<=NORMAL_FNA);
@@ -1339,7 +1387,12 @@ function renderHotels(hotels){
         <div class="stat"><div class="k">空室なし</div>
           <div class="v">${h.days.length-avail.length}<span class="date">日</span></div></div>
       </div>
-      <div class="section-label">${isNarrow() ? (heatMode ? 'ポイントカレンダー(月×日)' : (useValue ? '単価推移(円/pt) ── タップで日別詳細' : 'ポイント推移 ── タップで日別詳細')) : (useValue ? '単価推移(円/pt・宿泊日ごと ── 高いほどお得)' : 'ポイント推移(宿泊日ごと)')}</div>
+      <div class="section-label">${(()=>{
+        const heads = {points:'ポイント推移', cash:'価格推移(円)', value:'単価推移(円/pt)'};
+        const tails = {points:'(宿泊日ごと)', cash:'(宿泊日ごと)', value:'(宿泊日ごと ── 高いほどお得)'};
+        if(isNarrow()) return heatMode ? 'ポイントカレンダー(月×日)' : heads[chartMode]+' ── タップで日別詳細';
+        return heads[chartMode]+tails[chartMode];
+      })()}</div>
       <div class="chart-wrap"></div>
       <div class="section-label">狙い目日 ─ 必要ポイントが安い順</div>
       <div class="deals"></div>`;
@@ -1355,10 +1408,10 @@ function renderHotels(hotels){
         </div>`);
     }else if(isNarrow()){
       cw.classList.add('chart-compact');
-      cw.appendChild(buildCompactLineChart(h.days, useValue?'value':'points'));
+      cw.appendChild(buildCompactLineChart(h.days, chartMode));
     }else{
       cw.classList.add('chart-line');
-      cw.appendChild(buildLineChart(h.days, useValue?'value':'points'));
+      cw.appendChild(buildLineChart(h.days, chartMode));
     }
 
     // 狙い目日リスト(安い順トップ8)
@@ -1528,10 +1581,13 @@ document.getElementById('t-heat').addEventListener('change', e=>{
   document.getElementById('t-heat-wrap').classList.toggle('on', heatMode);
   render();
 });
-document.getElementById('t-value').addEventListener('change', e=>{
-  chartMetric = e.target.checked ? 'value' : 'points';
-  document.getElementById('t-value-wrap').classList.toggle('on', e.target.checked);
-  render();
+document.querySelectorAll('#metric-seg .tab').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    if(chartMetric === b.dataset.m) return;
+    chartMetric = b.dataset.m;
+    document.querySelectorAll('#metric-seg .tab').forEach(x=>x.classList.toggle('active', x===b));
+    render();
+  });
 });
 
 /* ============================================================
