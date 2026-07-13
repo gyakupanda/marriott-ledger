@@ -6,20 +6,15 @@ on:
   workflow_dispatch: {}      # 手動実行ボタンも有効化
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write            # dist をコミットするため write に変更
 
 concurrency:
-  group: pages
+  group: deploy
   cancel-in-progress: true
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -30,11 +25,18 @@ jobs:
           CASH_GID: ${{ secrets.CASH_GID }}
         run: python3 build.py
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+      - name: Publish dist to output branch
+        run: |
+          set -e
+          git config user.name  "areare-bot"
+          git config user.email "areare-bot@users.noreply.github.com"
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          # dist の中身だけを orphan ブランチ 'deploy' に反映する
+          # (履歴を汚さず、常に最新の成果物のみを保持)
+          cd dist
+          touch .nojekyll
+          git init -q
+          git checkout -q -b deploy
+          git add -A
+          git commit -q -m "Deploy $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" deploy
