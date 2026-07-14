@@ -64,5 +64,17 @@ def main():
     (out / "index.html").write_text(html, encoding="utf-8")
     print(f"dist/index.html を出力 ({len(html):,} bytes)")
 
+    # 単価ランキングページ(ranking.html)にも同じデータを埋め込んで出力する。
+    # ranking.html はindex.htmlと同じマーカー方式なので、存在すれば同様に処理する。
+    rank_src = pathlib.Path("ranking.html")
+    if rank_src.exists():
+        rhtml = rank_src.read_text(encoding="utf-8")
+        rhtml = inject(rhtml, "__POINTS_DATA_START__", "__POINTS_DATA_END__", "RAW_POINTS_CSV", points)
+        rhtml = inject(rhtml, "__CASH_DATA_START__", "__CASH_DATA_END__", "RAW_CASH_CSV", cash)
+        (out / "ranking.html").write_text(rhtml, encoding="utf-8")
+        print(f"dist/ranking.html を出力 ({len(rhtml):,} bytes)")
+    else:
+        print("ranking.html が無いためスキップ(index.htmlのみ出力)")
+
 if __name__ == "__main__":
     main()

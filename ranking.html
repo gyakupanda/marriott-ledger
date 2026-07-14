@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FAFBFC">
+<title>ポイント単価ランキング（円/pt） | Marriott ポイント宿泊台帳</title>
+<meta name="description" content="Marriott Bonvoyのポイント宿泊「単価（円/pt）」をホテル別に集計。各ホテルの最高・最低・平均単価と、全ホテル／地域別のランキングを毎朝自動更新。">
+<meta property="og:title" content="ポイント単価ランキング（円/pt） | Marriott ポイント宿泊台帳">
+<meta property="og:description" content="ポイント宿泊の単価（円/pt）をホテル別に集計。全ホテル・地域別ランキングを毎朝自動更新。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Marriott ポイント宿泊台帳">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#16233A; --ink-soft:#3D4A63; --paper:#FAFBFC; --line:#DDE2EA;
+    --brass:#B08D2E; --brass-soft:#F3ECD9;
+    --deal:#0E7C66; --deal-bg:#E3F2EE; --normal:#1A5FA8; --high:#B5432E;
+    --mono:'IBM Plex Mono',monospace; --serif:'Shippori Mincho',serif; --sans:'Noto Sans JP',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.7}
+  a{color:inherit}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+
+  header{border-bottom:1px solid var(--ink);padding:24px 24px 16px}
+  .masthead{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--brass);text-transform:uppercase}
+  h1{font-family:var(--serif);font-size:25px;font-weight:700;letter-spacing:.02em;margin-top:4px}
+  h1 .en{font-size:.5em;color:var(--ink-soft);letter-spacing:.14em;margin-left:.7em;font-weight:500}
+  .runinfo{font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-align:right;line-height:1.9}
+  .runinfo b{color:var(--ink)}
+
+  .pagenav{max-width:1100px;margin:0 auto;padding:12px 24px 0;display:flex;gap:8px;flex-wrap:wrap}
+  .navlink{font-size:13px;padding:8px 15px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:2px;text-decoration:none;transition:all .15s}
+  .navlink:hover{border-color:var(--ink);color:var(--ink)}
+  .navlink.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  .intro{max-width:1100px;margin:16px auto 0;padding:14px 20px;background:var(--brass-soft);border:1px solid #E7DcC0;border-radius:3px;font-size:13px;color:var(--ink-soft)}
+  .intro b{color:var(--ink)}
+  .intro .eq{font-family:var(--mono);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:2px;padding:1px 6px}
+
+  .controls{max-width:1100px;margin:18px auto 0;padding:0 24px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .ctrl-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ink-soft);text-transform:uppercase;margin-right:4px}
+  .tab{font-size:13px;padding:7px 14px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;border-radius:2px;transition:all .15s}
+  .tab:hover{border-color:var(--ink)}
+  .tab.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .sep{width:1px;align-self:stretch;background:var(--line);margin:2px 8px}
+
+  main{max-width:1100px;margin:0 auto;padding:22px 24px 60px}
+  h2{font-family:var(--serif);font-size:18px;font-weight:600;margin:26px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  h2:first-child{margin-top:6px}
+  h2 .sub{font-size:12px;font-weight:400;color:var(--ink-soft);margin-left:10px;font-family:var(--sans)}
+
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th{font-size:11px;color:var(--ink-soft);font-weight:500;letter-spacing:.04em;border-bottom:1px solid var(--ink)}
+  td.l,th.l{text-align:left}
+  tr:hover td{background:#fff}
+  .rank{font-family:var(--mono);font-size:12px;color:var(--ink-soft);width:34px;text-align:center}
+  .rank.top{color:var(--brass);font-weight:600}
+  .hotel-name{font-weight:500;text-decoration:none;border-bottom:1px solid transparent}
+  .hotel-name:hover{border-bottom-color:var(--brass)}
+  .hotel-name .arrow{color:var(--ink-soft);font-size:.85em;margin-left:3px}
+  .region-chip{display:inline-block;font-size:10.5px;color:var(--ink-soft);border:1px solid var(--line);border-radius:2px;padding:1px 7px}
+  .v{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .v.avg{font-size:14px;font-weight:600}
+  .v.good{color:var(--deal)}
+  .v.mid{color:var(--ink)}
+  .v.low{color:var(--ink-soft)}
+  .bar{display:inline-block;height:7px;border-radius:4px;background:var(--deal);vertical-align:middle;margin-left:8px;min-width:2px}
+  .muted{color:var(--ink-soft)}
+  .note{font-size:12px;color:var(--ink-soft);margin-top:8px}
+  .state-msg{padding:40px 0;text-align:center;color:var(--ink-soft)}
+  .state-msg .big{font-family:var(--serif);font-size:18px;color:var(--ink);margin-bottom:6px}
+
+  footer{border-top:1px solid var(--line);margin-top:30px}
+  .foot{max-width:1100px;margin:0 auto;padding:18px 24px 40px;font-size:11.5px;color:var(--ink-soft);line-height:1.9}
+  .foot a{color:var(--brass)}
+
+  @media(max-width:640px){
+    h1{font-size:21px}
+    .masthead{align-items:flex-start}
+    .runinfo{text-align:left}
+    th,td{padding:8px 7px}
+    .hide-sp{display:none}
+    .region-chip{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="masthead">
+    <div>
+      <div class="eyebrow">Marriott Bonvoy — Points Ledger</div>
+      <h1>ポイント単価ランキング<span class="en">POINTS VALUE RANKING</span></h1>
+    </div>
+    <div class="runinfo" id="runinfo">読み込み中…</div>
+  </div>
+</header>
+
+<nav class="pagenav">
+  <a class="navlink" href="index.html">← カレンダー台帳</a>
+  <a class="navlink active" href="ranking.html">単価ランキング</a>
+</nav>
+
+<div class="intro">
+  <b>単価（円/pt）</b> ＝ その日の <b>現金価格 ÷ 必要ポイント</b>。<b>数字が大きいほどポイントの価値が高い（＝お得）</b>です。目安は <span class="eq">等価 1.0 円/pt</span>。
+  日によって変動するため、各ホテルの <b>最高・最低・平均</b> を算出し、全ホテル／地域別でランキングしています。
+  <span class="muted">※価格データのあるホテルのみ対象。毎朝自動更新。</span>
+</div>
+
+<div class="controls" id="region-tabs"></div>
+<div class="controls" id="sort-tabs" style="margin-top:8px">
+  <span class="ctrl-label">Rank by</span>
+  <button class="tab" data-k="avg">平均</button>
+  <button class="tab" data-k="max">最高</button>
+  <button class="tab" data-k="min">最低</button>
+</div>
+
+<main id="main">
+  <div class="state-msg">読み込み中…</div>
+</main>
+
+<footer>
+  <div class="foot">
+    単価＝現金価格÷必要ポイント（円/pt）。現金価格・必要ポイントは公式サイトの表示を毎朝自動観測した参考値で、実際の予約可否・価格を保証するものではありません。価格データのある日のみ単価を算出しています。<br>
+    データ：<a href="index.html">ポイント宿泊台帳（カレンダー）</a> と同一。／ 筆者 アレアレ
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   ▼ 埋め込みデータ（build.py が下記マーカー内に自動注入）
+============================================================ */
+/*__POINTS_DATA_START__*/
+const RAW_POINTS_CSV = ``;
+/*__POINTS_DATA_END__*/
+/*__CASH_DATA_START__*/
+const RAW_CASH_CSV = ``;
+/*__CASH_DATA_END__*/
+
+/* ============================================================
+   ▼ 以下の解析ロジックは index.html と同一（単価の定義を揃えるため）
+============================================================ */
+const HOTEL_URLS = {};   // index.html 側で個別URLを管理。ここは source_url / 既定URL にフォールバック
+const REGION_ORDER = ['関東編','関西編','信州・富士編','沖縄編','オアフ編','マウイ編','カウアイ編','ハワイ島編'];
+const REGION_ALIASES = { '東京・関東編':'関東編', '高原リゾート編':'信州・富士編' };
+
+const fmt = n => n==null ? '—' : n.toLocaleString('ja-JP');
+const esc = s => String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+function parseCSV(text){
+  const rows=[]; let cur=['']; let inQ=false,c=0;
+  for(let i=0;i<text.length;i++){ const ch=text[i];
+    if(inQ){ if(ch==='"'){ if(text[i+1]==='"'){cur[c]+='"';i++;} else inQ=false; } else cur[c]+=ch; }
+    else{ if(ch==='"') inQ=true;
+      else if(ch===','){ cur.push(''); c++; }
+      else if(ch==='\n'||ch==='\r'){ if(ch==='\r'&&text[i+1]==='\n')i++; rows.push(cur); cur=['']; c=0; }
+      else cur[c]+=ch; } }
+  if(cur.length>1||cur[0]!=='') rows.push(cur);
+  return rows;
+}
+function rowsToObjects(rows){
+  if(rows.length<2) return [];
+  const head=rows[0].map(s=>String(s).trim().toLowerCase());
+  return rows.slice(1).map(r=>{ const o={}; head.forEach((h,i)=>o[h]=r[i]!==undefined?String(r[i]).trim():''); return o; });
+}
+const toBool = v => v==='TRUE'||v==='true'||v==='1'||v===1||v===true;
+const toNum = v => { if(v===''||v==null) return null; const n=Number(String(v).replace(/[,\s¥円]/g,'')); return Number.isFinite(n)&&n>0?n:null; };
+function normDate(v){
+  const s=String(v).trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const m=s.match(/^(\d{4})[\/年](\d{1,2})[\/月](\d{1,2})/);
+  if(m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+  const d=new Date(s); if(!isNaN(d.getTime())) return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return '';
+}
+function parseTs(s){
+  if(!s) return null; s=String(s).trim();
+  if(/[zZ]$|[+\-]\d{2}:?\d{2}$/.test(s)){ const d=new Date(s); return isNaN(d.getTime())?null:d; }
+  const m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})(?:[T ](\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if(m) return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));
+  const d=new Date(s); return isNaN(d.getTime())?null:d;
+}
+const tsVal = s => { const d=parseTs(s); return d?d.getTime():-Infinity; };
+function fmtChecked(iso){
+  if(!iso) return ''; const d=parseTs(iso); if(!d) return String(iso).slice(0,10);
+  const p=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d).reduce((o,x)=>(o[x.type]=x.value,o),{});
+  return `${p.month}/${p.day} ${p.hour}:${p.minute}`;
+}
+function dedupeLatest(objs){
+  const map=new Map();
+  for(const o of objs){
+    const code=(o.property_code||'').toUpperCase(); const date=normDate(o.stay_date);
+    if(!code||!date) continue; const key=code+'__'+date; const prev=map.get(key);
+    if(!prev||tsVal(o.checked_at)>=tsVal(prev.checked_at)) map.set(key,o);
+  }
+  return map;
+}
+function buildModel(pointObjs, cashObjs){
+  const pMap=dedupeLatest(pointObjs); const cMap=cashObjs?dedupeLatest(cashObjs):new Map();
+  const hotels=new Map();
+  for(const [key,p] of pMap){
+    const code=(p.property_code||'').toUpperCase();
+    if(!hotels.has(code)){
+      hotels.set(code,{ code, name:p.hotel_name||code,
+        region:REGION_ALIASES[p.region_name]||p.region_name||'—',
+        priority:Number(p.priority_score||50),
+        url:HOTEL_URLS[code] || ((p.source_url&&/^https?:\/\//.test(p.source_url))?p.source_url:`https://www.marriott.com/ja/hotels/${code.toLowerCase()}/overview/`),
+        checkedAt:'', days:[] });
+    }
+    const h=hotels.get(code); const c=cMap.get(key);
+    const pts=toBool(p.points_available)?toNum(p.points_required):null;
+    const cash=c&&toBool(c.cash_available)?toNum(c.cash_price_jpy):null;
+    h.days.push({ date:normDate(p.stay_date), points:pts, cash, value:(pts&&cash)?cash/pts:null });
+    if(tsVal(p.checked_at)>tsVal(h.checkedAt)) h.checkedAt=String(p.checked_at||'');
+  }
+  const d0=new Date(); const today=`${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,'0')}-${String(d0.getDate()).padStart(2,'0')}`;
+  for(const h of hotels.values()){ h.days=h.days.filter(d=>d.date>=today); h.days.sort((a,b)=>a.date<b.date?-1:1); }
+  return [...hotels.values()].filter(h=>h.days.length).sort((a,b)=>b.priority-a.priority);
+}
+
+/* ============================================================
+   ▼ ここからランキング固有（単価の集計・描画）
+============================================================ */
+let MODEL=[], AGG=[], activeRegion='すべて', sortKey='avg', latestChecked='';
+
+function aggregate(model){
+  return model.map(h=>{
+    const vals=h.days.map(d=>d.value).filter(v=>v!=null&&isFinite(v));
+    if(!vals.length) return {code:h.code,name:h.name,region:h.region,url:h.url,n:0,avg:null,max:null,min:null,maxDay:null,minDay:null};
+    let mx=-Infinity,mn=Infinity,mxD=null,mnD=null,sum=0;
+    for(const d of h.days){ const v=d.value; if(v==null||!isFinite(v))continue; sum+=v; if(v>mx){mx=v;mxD=d.date;} if(v<mn){mn=v;mnD=d.date;} }
+    return {code:h.code,name:h.name,region:h.region,url:h.url,n:vals.length,avg:sum/vals.length,max:mx,min:mn,maxDay:mxD,minDay:mnD};
+  });
+}
+function regionsInData(){
+  const set=new Set(AGG.filter(a=>a.n>0).map(a=>a.region));
+  const ordered=REGION_ORDER.filter(r=>set.has(r));
+  for(const r of set){ if(!ordered.includes(r)) ordered.push(r); }
+  return ['すべて',...ordered];
+}
+const vClass = v => v==null?'low':(v>=1.0?'good':(v>=0.7?'mid':'low'));
+const fv = v => v==null?'—':v.toFixed(2);
+
+function renderRegionTabs(){
+  const wrap=document.getElementById('region-tabs'); wrap.innerHTML='';
+  const label=document.createElement('span'); label.className='ctrl-label'; label.textContent='Region'; wrap.appendChild(label);
+  for(const r of regionsInData()){
+    const cnt = r==='すべて' ? AGG.filter(a=>a.n>0).length : AGG.filter(a=>a.n>0&&a.region===r).length;
+    const b=document.createElement('button'); b.className='tab'+(r===activeRegion?' active':'');
+    b.textContent = r==='すべて' ? `すべて(${cnt})` : `${r}(${cnt})`;
+    b.onclick=()=>{ activeRegion=r; renderRegionTabs(); renderMain(); };
+    wrap.appendChild(b);
+  }
+}
+function bindSortTabs(){
+  document.querySelectorAll('#sort-tabs .tab').forEach(b=>{
+    b.classList.toggle('active', b.dataset.k===sortKey);
+    b.onclick=()=>{ sortKey=b.dataset.k; bindSortTabs(); renderMain(); };
+  });
+}
+
+function hotelRow(a, rank, maxAvgForBar){
+  const barW = (sortKey==='avg' && a.avg!=null && maxAvgForBar>0) ? Math.max(2, Math.round(a.avg/maxAvgForBar*70)) : 0;
+  return `<tr>
+    <td class="rank${rank<=3?' top':''}">${rank}</td>
+    <td class="l"><a class="hotel-name" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.name)}<span class="arrow">↗</span></a></td>
+    <td class="l hide-sp"><span class="region-chip">${esc(a.region)}</span></td>
+    <td class="v avg ${vClass(a.avg)}">${fv(a.avg)}${barW?`<span class="bar" style="width:${barW}px"></span>`:''}</td>
+    <td class="v ${vClass(a.max)} hide-sp">${fv(a.max)}</td>
+    <td class="v ${vClass(a.min)} hide-sp">${fv(a.min)}</td>
+    <td class="v muted">${a.n}</td>
+  </tr>`;
+}
+function rankTable(list){
+  const sorted=[...list].sort((x,y)=>(y[sortKey]??-Infinity)-(x[sortKey]??-Infinity));
+  const maxAvg=Math.max(...sorted.map(a=>a.avg||0),0);
+  return `<table><thead><tr>
+      <th>#</th><th class="l">ホテル</th><th class="l hide-sp">地域</th>
+      <th>平均<span class="hide-sp"> 円/pt</span></th><th class="hide-sp">最高</th><th class="hide-sp">最低</th><th>日数</th>
+    </tr></thead><tbody>
+    ${sorted.map((a,i)=>hotelRow(a,i+1,maxAvg)).join('')}
+  </tbody></table>`;
+}
+
+function regionSummary(withData){
+  const byR=new Map();
+  for(const a of withData){ if(!byR.has(a.region)) byR.set(a.region,[]); byR.get(a.region).push(a); }
+  const rows=[...byR.entries()].map(([region,list])=>{
+    const avg=list.reduce((s,a)=>s+a.avg,0)/list.length;
+    const best=list.reduce((b,a)=>a.avg>b.avg?a:b,list[0]);
+    return {region,count:list.length,avg,best};
+  }).sort((x,y)=>y.avg-x.avg);
+  const maxAvg=Math.max(...rows.map(r=>r.avg),0);
+  return `<table><thead><tr>
+      <th>#</th><th class="l">地域</th><th>地域平均<span class="hide-sp"> 円/pt</span></th><th class="l">ベストホテル</th><th>軒数</th>
+    </tr></thead><tbody>
+    ${rows.map((r,i)=>{ const barW=maxAvg>0?Math.max(2,Math.round(r.avg/maxAvg*60)):0; return `<tr>
+      <td class="rank${i<3?' top':''}">${i+1}</td>
+      <td class="l">${esc(r.region)}</td>
+      <td class="v avg ${vClass(r.avg)}">${fv(r.avg)}<span class="bar" style="width:${barW}px"></span></td>
+      <td class="l"><a class="hotel-name" href="${esc(r.best.url)}" target="_blank" rel="noopener">${esc(r.best.name)}<span class="arrow">↗</span></a> <span class="muted v">(${fv(r.best.avg)})</span></td>
+      <td class="v muted">${r.count}</td>
+    </tr>`; }).join('')}
+  </tbody></table>
+  <div class="note">地域平均＝その地域の各ホテル「平均単価」の平均。ベストホテル＝平均単価が最も高いホテル。</div>`;
+}
+
+function renderMain(){
+  const main=document.getElementById('main');
+  const withData=AGG.filter(a=>a.n>0);
+  const noData=AGG.filter(a=>a.n===0);
+  if(!withData.length){
+    main.innerHTML=`<div class="state-msg"><div class="big">単価データがまだありません</div>価格（現金）データが揃うと単価ランキングが表示されます。</div>`;
+    return;
+  }
+  let html='';
+  if(activeRegion==='すべて'){
+    html+=`<h2>地域別ランキング<span class="sub">地域平均単価の高い順</span></h2>`;
+    html+=regionSummary(withData);
+    html+=`<h2>全ホテル ランキング<span class="sub">${withData.length}軒／${{avg:'平均',max:'最高',min:'最低'}[sortKey]}単価の高い順</span></h2>`;
+    html+=rankTable(withData);
+  }else{
+    const list=withData.filter(a=>a.region===activeRegion);
+    html+=`<h2>${esc(activeRegion)} ランキング<span class="sub">${list.length}軒／${{avg:'平均',max:'最高',min:'最低'}[sortKey]}単価の高い順</span></h2>`;
+    html+=rankTable(list);
+  }
+  if(noData.length){
+    html+=`<div class="note">※価格データ待ちのため単価ランキング対象外：${noData.length}軒（${noData.slice(0,8).map(a=>esc(a.name)).join('、')}${noData.length>8?' ほか':''}）</div>`;
+  }
+  main.innerHTML=html;
+}
+
+function boot(){
+  const info=document.getElementById('runinfo');
+  try{
+    const hasP = typeof RAW_POINTS_CSV!=='undefined' && RAW_POINTS_CSV.trim();
+    if(!hasP){
+      document.getElementById('main').innerHTML=`<div class="state-msg"><div class="big">データ未接続</div>build.py によるデータ埋め込み後に表示されます。</div>`;
+      info.textContent='データ未接続'; return;
+    }
+    const pointObjs=rowsToObjects(parseCSV(RAW_POINTS_CSV));
+    const cashObjs=(typeof RAW_CASH_CSV!=='undefined'&&RAW_CASH_CSV.trim())?rowsToObjects(parseCSV(RAW_CASH_CSV)):null;
+    MODEL=buildModel(pointObjs,cashObjs);
+    AGG=aggregate(MODEL);
+    latestChecked=pointObjs.reduce((m,o)=>tsVal(o.checked_at)>tsVal(m)?String(o.checked_at):m,'');
+    info.innerHTML = latestChecked ? `最終更新 <b>${esc(fmtChecked(latestChecked))}</b>` : '';
+    renderRegionTabs(); bindSortTabs(); renderMain();
+  }catch(err){
+    document.getElementById('main').innerHTML=`<div class="state-msg"><div class="big">読み込みエラー</div>${esc(err.message)}</div>`;
+  }
+}
+boot();
+</script>
+</body>
+</html>
