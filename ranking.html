@@ -50,6 +50,12 @@
   .intro .eq{font-family:var(--mono);color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:2px;padding:1px 6px}
 
   .controls{max-width:1100px;margin:18px auto 0;padding:0 24px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .table-controls{width:max-content;max-width:100%;margin:0 0 12px;padding:4px 6px;gap:2px;flex-wrap:nowrap;background:#f7f5ef;border:1px solid var(--line);border-radius:3px}
+  .table-controls .ctrl-label{margin:0 5px 0 2px;color:var(--ink);font-weight:600;letter-spacing:.08em}
+  .table-controls .tab{padding:4px 10px;border-color:transparent;background:transparent;font-size:12px;line-height:1.35}
+  .table-controls .tab:hover{border-color:var(--line);background:#fff}
+  .table-controls .tab.active{background:var(--ink);color:#fff;border-color:var(--ink);font-weight:600}
+  .sort-hint{margin-left:5px;font-size:10px;color:var(--ink-soft);white-space:nowrap}
   .ctrl-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--ink-soft);text-transform:uppercase;margin-right:4px}
   .tab{font-size:13px;padding:7px 14px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;border-radius:2px;transition:all .15s}
   .tab:hover{border-color:var(--ink)}
@@ -97,7 +103,9 @@
   tr.rank-first td{background:linear-gradient(90deg,rgba(243,236,217,.8),rgba(255,255,255,.45))}
   td.metric-active,th.metric-active{background:rgba(227,242,238,.55)}
   th.metric-active{color:var(--deal);font-weight:700}
-  .value-date{display:block;margin-top:1px;font-family:var(--sans);font-size:9.5px;font-weight:400;color:var(--ink-soft)}
+  .value-date{display:block;margin-top:3px;font-family:var(--sans);font-size:11.5px;font-weight:600;color:var(--ink)}
+  .value-detail{display:block;margin-top:1px;font-family:var(--sans);font-size:10px;font-weight:400;line-height:1.4;color:var(--ink-soft)}
+  .all-regions-guide{margin-top:14px;padding:12px 14px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);font-size:12px}
 
   footer{border-top:1px solid var(--line);margin-top:30px}
   .foot{max-width:1100px;margin:0 auto;padding:18px 24px 40px;font-size:11.5px;color:var(--ink-soft);line-height:1.9}
@@ -118,6 +126,21 @@
     .leader-region{margin:0}
     .leader-value{grid-column:3;grid-row:1/3;margin:0;font-size:18px;text-align:right}
     .leader-meta{display:none}
+    #main .table-wrap{overflow-x:visible}
+    #main table[class^="sort-"]{width:100%;table-layout:fixed}
+    #main table[class^="sort-"] th:nth-child(1){width:28px}
+    #main table[class^="sort-"] th:nth-child(2){width:auto}
+    #main table[class^="sort-"] th:nth-child(4),
+    #main table[class^="sort-"] th:nth-child(5),
+    #main table[class^="sort-"] th:nth-child(6){width:122px}
+    #main table[class^="sort-"] th:nth-child(7),
+    #main table[class^="sort-"] td:nth-child(7){display:none}
+    #main .hotel-name{display:block;white-space:normal;overflow-wrap:anywhere;line-height:1.4}
+    #main .value-detail{font-size:9.5px}
+    .table-controls{width:100%;box-sizing:border-box}
+    .table-controls .ctrl-label{margin-right:auto}
+    .table-controls .tab{padding:4px 8px}
+    .sort-hint{display:none}
     table.sort-max th:nth-child(4),table.sort-max td:nth-child(4),
     table.sort-min th:nth-child(4),table.sort-min td:nth-child(4){display:none}
     table.sort-max th:nth-child(5),table.sort-max td:nth-child(5),
@@ -149,12 +172,6 @@
 </div>
 
 <div class="controls" id="region-tabs"></div>
-<div class="controls" id="sort-tabs" style="margin-top:8px">
-  <span class="ctrl-label">Rank by</span>
-  <button class="tab" data-k="avg">平均</button>
-  <button class="tab" data-k="max">最高</button>
-  <button class="tab" data-k="min">最低</button>
-</div>
 
 <main id="main">
   <div class="state-msg">読み込み中…</div>
@@ -272,10 +289,14 @@ let MODEL=[], AGG=[], activeRegion='すべて', sortKey='avg', latestChecked='';
 function aggregate(model){
   return model.map(h=>{
     const vals=h.days.map(d=>d.value).filter(v=>v!=null&&isFinite(v));
-    if(!vals.length) return {code:h.code,name:h.name,region:h.region,url:h.url,n:0,avg:null,max:null,min:null,maxDay:null,minDay:null};
-    let mx=-Infinity,mn=Infinity,mxD=null,mnD=null,sum=0;
-    for(const d of h.days){ const v=d.value; if(v==null||!isFinite(v))continue; sum+=v; if(v>mx){mx=v;mxD=d.date;} if(v<mn){mn=v;mnD=d.date;} }
-    return {code:h.code,name:h.name,region:h.region,url:h.url,n:vals.length,avg:sum/vals.length,max:mx,min:mn,maxDay:mxD,minDay:mnD};
+    if(!vals.length) return {code:h.code,name:h.name,region:h.region,url:h.url,n:0,avg:null,max:null,min:null,maxDay:null,minDay:null,maxPoints:null,maxCash:null,minPoints:null,minCash:null};
+    let mx=-Infinity,mn=Infinity,mxD=null,mnD=null,mxP=null,mxC=null,mnP=null,mnC=null,sum=0;
+    for(const d of h.days){
+      const v=d.value; if(v==null||!isFinite(v))continue; sum+=v;
+      if(v>mx){mx=v;mxD=d.date;mxP=d.points;mxC=d.cash;}
+      if(v<mn){mn=v;mnD=d.date;mnP=d.points;mnC=d.cash;}
+    }
+    return {code:h.code,name:h.name,region:h.region,url:h.url,n:vals.length,avg:sum/vals.length,max:mx,min:mn,maxDay:mxD,minDay:mnD,maxPoints:mxP,maxCash:mxC,minPoints:mnP,minCash:mnC};
   });
 }
 function regionsInData(){
@@ -298,16 +319,30 @@ function renderRegionTabs(){
     wrap.appendChild(b);
   }
 }
+function sortControls(){
+  return `<div class="controls table-controls" id="sort-tabs">
+    <span class="ctrl-label">並び順</span>
+    ${['avg','max','min'].map(k=>`<button class="tab${k===sortKey?' active':''}" data-k="${k}" aria-pressed="${k===sortKey}">${k===sortKey?'↓ ':''}${{avg:'平均',max:'最高',min:'最低'}[k]}単価</button>`).join('')}
+    <span class="sort-hint">高い順</span>
+  </div>`;
+}
 function bindSortTabs(){
   document.querySelectorAll('#sort-tabs .tab').forEach(b=>{
-    b.classList.toggle('active', b.dataset.k===sortKey);
-    b.onclick=()=>{ sortKey=b.dataset.k; bindSortTabs(); renderMain(); };
+    b.onclick=()=>{ sortKey=b.dataset.k; renderMain(); };
   });
 }
 
 const sortLabel = () => ({avg:'平均',max:'最高',min:'最低'}[sortKey]);
 const metricDate = a => sortKey==='max' ? a.maxDay : sortKey==='min' ? a.minDay : null;
-const shortDate = iso => iso ? `${Number(iso.slice(5,7))}/${Number(iso.slice(8,10))}` : '';
+const dayDetail = (a,key) => key==='max'
+  ? {date:a.maxDay,points:a.maxPoints,cash:a.maxCash}
+  : {date:a.minDay,points:a.minPoints,cash:a.minCash};
+function dateWithWeekday(iso){
+  if(!iso) return '';
+  const d=new Date(iso+'T00:00:00');
+  return `${Number(iso.slice(5,7))}/${Number(iso.slice(8,10))}（${['日','月','火','水','木','金','土'][d.getDay()]}）`;
+}
+const priceDetail = d => d&&d.points&&d.cash ? `${fmt(d.points)}pt ／ ¥${fmt(d.cash)}` : '';
 function sortedHotels(list){ return [...list].sort((x,y)=>(y[sortKey]??-Infinity)-(x[sortKey]??-Infinity)); }
 
 function leaderCards(list){
@@ -319,7 +354,7 @@ function leaderCards(list){
       <a class="leader-name" href="${esc(a.url)}" target="_blank" rel="noopener" title="${esc(a.name)}">${esc(a.name)}</a>
       <div class="leader-region">${esc(a.region)}</div>
       <div class="leader-value">${fv(a[sortKey])}<span class="leader-unit">円/pt</span></div>
-      <div class="leader-meta">${sortLabel()}単価${metricDate(a)?` ・ ${esc(metricDate(a))}`:` ・ ${a.n}日平均`}</div>
+      <div class="leader-meta">${sortLabel()}単価${metricDate(a)?` ・ ${dateWithWeekday(metricDate(a))} ・ ${priceDetail(dayDetail(a,sortKey))}`:` ・ ${a.n}日平均`}</div>
     </article>`).join('')}
   </div>`;
 }
@@ -331,8 +366,8 @@ function hotelRow(a, rank, maxAvgForBar){
     <td class="l"><a class="hotel-name" href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.name)}<span class="arrow">↗</span></a></td>
     <td class="l hide-sp"><span class="region-chip">${esc(a.region)}</span></td>
     <td class="v avg ${vClass(a.avg)}${sortKey==='avg'?' metric-active':''}">${fv(a.avg)}${barW?`<span class="bar" style="width:${barW}px"></span>`:''}</td>
-    <td class="v ${vClass(a.max)} hide-sp${sortKey==='max'?' metric-active':''}">${fv(a.max)}<span class="value-date">${shortDate(a.maxDay)}</span></td>
-    <td class="v ${vClass(a.min)} hide-sp${sortKey==='min'?' metric-active':''}">${fv(a.min)}<span class="value-date">${shortDate(a.minDay)}</span></td>
+    <td class="v ${vClass(a.max)} hide-sp${sortKey==='max'?' metric-active':''}">${fv(a.max)}<span class="value-date">${dateWithWeekday(a.maxDay)}</span><span class="value-detail">${priceDetail(dayDetail(a,'max'))}</span></td>
+    <td class="v ${vClass(a.min)} hide-sp${sortKey==='min'?' metric-active':''}">${fv(a.min)}<span class="value-date">${dateWithWeekday(a.minDay)}</span><span class="value-detail">${priceDetail(dayDetail(a,'min'))}</span></td>
     <td class="v muted">${a.n}</td>
   </tr>`;
 }
@@ -382,12 +417,11 @@ function renderMain(){
   if(activeRegion==='すべて'){
     html+=`<h2>地域別ランキング<span class="sub">地域平均単価の高い順</span></h2>`;
     html+=regionSummary(withData);
-    html+=`<h2>全ホテル ランキング<span class="sub">${withData.length}軒／${{avg:'平均',max:'最高',min:'最低'}[sortKey]}単価の高い順</span></h2>`;
-    html+=leaderCards(withData);
-    html+=rankTable(withData);
+    html+=`<div class="all-regions-guide">ホテル別ランキングは、上の地域タブから地域を選ぶと表示されます。</div>`;
   }else{
     const list=withData.filter(a=>a.region===activeRegion);
     html+=`<h2>${esc(activeRegion)} ランキング<span class="sub">${list.length}軒／${{avg:'平均',max:'最高',min:'最低'}[sortKey]}単価の高い順</span></h2>`;
+    html+=sortControls();
     html+=leaderCards(list);
     html+=rankTable(list);
   }
@@ -395,6 +429,7 @@ function renderMain(){
     html+=`<div class="note">※価格データ待ちのため単価ランキング対象外：${noData.length}軒（${noData.slice(0,8).map(a=>esc(a.name)).join('、')}${noData.length>8?' ほか':''}）</div>`;
   }
   main.innerHTML=html;
+  bindSortTabs();
 }
 
 function boot(){
@@ -411,7 +446,7 @@ function boot(){
     AGG=aggregate(MODEL);
     latestChecked=pointObjs.reduce((m,o)=>tsVal(o.checked_at)>tsVal(m)?String(o.checked_at):m,'');
     info.innerHTML = latestChecked ? `最終更新 <b>${esc(fmtChecked(latestChecked))}</b>` : '';
-    renderRegionTabs(); bindSortTabs(); renderMain();
+    renderRegionTabs(); renderMain();
   }catch(err){
     document.getElementById('main').innerHTML=`<div class="state-msg"><div class="big">読み込みエラー</div>${esc(err.message)}</div>`;
   }
