@@ -6,12 +6,17 @@
 <meta name="theme-color" content="#FAFBFC">
 <title>Marriott ポイント宿泊台帳 | 無料宿泊券の狙い目カレンダー</title>
 <meta name="description" content="Marriott Bonvoyポイント宿泊の必要ポイントを毎朝自動観測。10万pt以下・7.5万pt以下の狙い目日程をホテル別カレンダーで公開。">
-<!-- OGP: 公開URLが決まったら og:url / og:image を追記してください -->
 <meta property="og:title" content="Marriott ポイント宿泊台帳 | 無料宿泊券の狙い目カレンダー">
 <meta property="og:description" content="Marriott Bonvoyポイント宿泊の必要ポイントを毎朝自動観測。10万pt以下・7.5万pt以下の狙い目日程をホテル別に公開。">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Marriott ポイント宿泊台帳">
-<meta name="twitter:card" content="summary">
+<meta property="og:url" content="https://ledger.areare-travel.com/">
+<meta property="og:image" content="https://ledger.areare-travel.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Marriott ポイント宿泊台帳 — 無料宿泊券の狙い目を毎朝のデータで確認">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ledger.areare-travel.com/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -581,11 +586,19 @@ const HOTEL_URLS = {
 };
 
 /* 地域タブの表示順(日本→ハワイ)。CSVに未知の地域名が来ても末尾に自動追加されます */
-const REGION_ORDER = ['関東編','関西編','信州・富士編','沖縄編','オアフ編','マウイ編','カウアイ編','ハワイ島編'];
+const REGION_ORDER = ['関東','関西','信州・富士','沖縄','ハワイ・オアフ島','ハワイ・マウイ島','ハワイ・カウアイ島','ハワイ島'];
 /* CSVのregion_name→表示名の変換(パイプライン側の修正不要で名称を差し替えられます) */
 const REGION_ALIASES = {
-  '東京・関東編': '関東編',
-  '高原リゾート編': '信州・富士編',
+  '東京・関東編': '関東',
+  '関東編': '関東',
+  '関西編': '関西',
+  '高原リゾート編': '信州・富士',
+  '信州・富士編': '信州・富士',
+  '沖縄編': '沖縄',
+  'オアフ編': 'ハワイ・オアフ島',
+  'マウイ編': 'ハワイ・マウイ島',
+  'カウアイ編': 'ハワイ・カウアイ島',
+  'ハワイ島編': 'ハワイ島',
 };
 
 /* ============================================================

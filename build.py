@@ -6,7 +6,7 @@ GitHub Actions から実行される。環境変数:
   POINTS_GID (必須) Marriott_Raw タブのgid (例: 0)
   CASH_GID   (任意) Marriott_Raw_Cash タブのgid。未設定なら価格は埋め込まない
 """
-import os, re, sys, urllib.request, pathlib
+import csv, io, os, re, shutil, sys, urllib.request, pathlib
 
 SHEET_ID = os.environ["SHEET_ID"]
 POINTS_GID = os.environ.get("POINTS_GID", "0")
@@ -39,6 +39,28 @@ def inject(html: str, start: str, end: str, varname: str, csv_text: str) -> str:
         )
     return new_html
 
+def check_cash_quality(csv_text: str) -> None:
+    """cash_available=TRUEなのに価格が空の行をActionsの警告にする。"""
+    rows = list(csv.DictReader(io.StringIO(csv_text)))
+    invalid = [
+        row for row in rows
+        if row.get("cash_available", "").strip().lower() in ("true", "1")
+        and not row.get("cash_price_jpy", "").strip()
+    ]
+    if not invalid:
+        return
+
+    regions = {}
+    for row in invalid:
+        region = row.get("region_name", "").strip() or "地域不明"
+        regions[region] = regions.get(region, 0) + 1
+    detail = ", ".join(f"{region}: {count}行" for region, count in sorted(regions.items()))
+    message = (
+        f"現金価格データ異常: cash_available=TRUE かつ cash_price_jpy が空の行が"
+        f" {len(invalid)}件あります ({detail})"
+    )
+    print(f"::warning title=Cash data quality::{message}", file=sys.stderr)
+
 def main():
     points = fetch_csv(POINTS_GID)
     rows = points.count("\n")
@@ -52,6 +74,7 @@ def main():
         try:
             cash = fetch_csv(CASH_GID)
             print(f"cash: {cash.count(chr(10))} 行取得")
+            check_cash_quality(cash)
         except Exception as e:
             print(f"価格データの取得に失敗(ポイントのみで続行): {e}", file=sys.stderr)
 
@@ -75,6 +98,14 @@ def main():
         print(f"dist/ranking.html を出力 ({len(rhtml):,} bytes)")
     else:
         print("ranking.html が無いためスキップ(index.htmlのみ出力)")
+
+    # SNS共有用のOGP画像を公開ルートへコピーする。
+    for image_name in ("og-image.png", "og-ranking.png"):
+        image_src = pathlib.Path("assets") / image_name
+        if not image_src.exists():
+            raise RuntimeError(f"OGP画像が見つかりません: {image_src}")
+        shutil.copy2(image_src, out / image_name)
+        print(f"dist/{image_name} を出力")
 
 if __name__ == "__main__":
     main()

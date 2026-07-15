@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e3f2ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#fafbfc"/>
+  <rect x="44" y="44" width="1112" height="542" rx="12" fill="url(#paper)" stroke="#dde2ea" stroke-width="2"/>
+  <rect x="44" y="44" width="14" height="542" rx="7" fill="#0e7c66"/>
+  <text x="100" y="112" fill="#b08d2e" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" font-weight="600" letter-spacing="4">MARRIOTT BONVOY — POINTS LEDGER</text>
+  <text x="98" y="218" fill="#16233a" font-family="Hiragino Mincho ProN, Yu Mincho, serif" font-size="68" font-weight="700">ポイント単価ランキング</text>
+  <text x="102" y="274" fill="#3d4a63" font-family="Hiragino Kaku Gothic ProN, Yu Gothic, sans-serif" font-size="27" font-weight="600">平均・最高・最低から、ポイントの価値を比較。</text>
+  <g transform="translate(100 342)">
+    <rect width="306" height="142" rx="8" fill="#fff" stroke="#b08d2e" stroke-width="3"/>
+    <text x="22" y="36" fill="#b08d2e" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="16" font-weight="700">NO. 1</text>
+    <rect x="22" y="60" width="198" height="12" rx="6" fill="#16233a" opacity=".86"/>
+    <rect x="22" y="84" width="148" height="9" rx="4" fill="#dde2ea"/>
+    <text x="22" y="124" fill="#0e7c66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="30" font-weight="700">1.40 円/pt</text>
+  </g>
+  <g transform="translate(430 360)">
+    <rect width="306" height="124" rx="8" fill="#fff" stroke="#dde2ea" stroke-width="2"/>
+    <text x="22" y="34" fill="#3d4a63" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15">NO. 2</text>
+    <rect x="22" y="56" width="184" height="11" rx="5" fill="#16233a" opacity=".78"/>
+    <text x="22" y="104" fill="#0e7c66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="28" font-weight="700">1.23 円/pt</text>
+  </g>
+  <g transform="translate(760 376)">
+    <rect width="296" height="108" rx="8" fill="#fff" stroke="#dde2ea" stroke-width="2"/>
+    <text x="22" y="32" fill="#3d4a63" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15">NO. 3</text>
+    <rect x="22" y="52" width="164" height="10" rx="5" fill="#16233a" opacity=".72"/>
+    <text x="22" y="91" fill="#0e7c66" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="26" font-weight="700">1.15 円/pt</text>
+  </g>
+  <text x="100" y="536" fill="#3d4a63" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">ledger.areare-travel.com/ranking.html</text>
+</svg>
