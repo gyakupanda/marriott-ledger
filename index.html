@@ -50,6 +50,14 @@
   .runinfo{font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-align:right;line-height:1.9}
   .runinfo b{color:var(--ink)}
 
+  .pagenav{max-width:1100px;margin:0 auto;padding:12px 24px 0;display:grid;grid-template-columns:repeat(2,minmax(0,240px));gap:7px}
+  .navlink{display:flex;flex-direction:column;padding:8px 13px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:3px;text-decoration:none;line-height:1.35;transition:all .15s}
+  .navlink:hover{border-color:var(--ink);color:var(--ink)}
+  .navlink strong{font-size:13px;font-weight:600;color:var(--ink)}
+  .navlink small{margin-top:2px;font-size:10px;color:var(--ink-soft)}
+  .navlink.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .navlink.active strong,.navlink.active small{color:#fff}
+
   .controls{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .tab{font-size:13px;padding:7px 15px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;border-radius:2px;transition:all .15s}
   .tab:hover{border-color:var(--ink)}
@@ -256,6 +264,10 @@
   footer .mono{font-family:var(--mono)}
 
   @media (max-width:640px){
+    .pagenav{grid-template-columns:1fr 1fr;padding:10px 16px 0}
+    .navlink{padding:8px 9px}
+    .navlink strong{font-size:12px}
+    .navlink small{display:none}
     header{padding:16px 16px 12px}
     h1 .en{display:none}
     .runinfo{text-align:left;font-size:10px;line-height:1.8}
@@ -323,9 +335,10 @@
   </div>
 </header>
 
-<div class="controls" style="padding-top:14px;padding-bottom:0">
-  <a class="tab" href="ranking.html" style="text-decoration:none">📊 ポイント単価ランキング（円/pt）を見る →</a>
-</div>
+<nav class="pagenav" aria-label="ページ切り替え">
+  <a class="navlink active" href="index.html" aria-current="page"><strong>📅 宿泊カレンダー</strong><small>ポイント・価格を日別に確認</small></a>
+  <a class="navlink" href="ranking.html"><strong>📊 単価ランキング</strong><small>ホテル・地域のお得度を比較</small></a>
+</nav>
 
 <div class="note-banner top"></div>
 

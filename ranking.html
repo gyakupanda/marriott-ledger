@@ -40,10 +40,13 @@
   .runinfo{font-family:var(--mono);font-size:11px;color:var(--ink-soft);text-align:right;line-height:1.9}
   .runinfo b{color:var(--ink)}
 
-  .pagenav{max-width:1100px;margin:0 auto;padding:12px 24px 0;display:flex;gap:8px;flex-wrap:wrap}
-  .navlink{font-size:13px;padding:8px 15px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:2px;text-decoration:none;transition:all .15s}
+  .pagenav{max-width:1100px;margin:0 auto;padding:12px 24px 0;display:grid;grid-template-columns:repeat(2,minmax(0,240px));gap:7px}
+  .navlink{display:flex;flex-direction:column;padding:8px 13px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);border-radius:3px;text-decoration:none;line-height:1.35;transition:all .15s}
   .navlink:hover{border-color:var(--ink);color:var(--ink)}
+  .navlink strong{font-size:13px;font-weight:600;color:var(--ink)}
+  .navlink small{margin-top:2px;font-size:10px;color:var(--ink-soft)}
   .navlink.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .navlink.active strong,.navlink.active small{color:#fff}
 
   .intro{max-width:1100px;margin:16px auto 0;padding:14px 20px;background:var(--brass-soft);border:1px solid #E7DcC0;border-radius:3px;font-size:13px;color:var(--ink-soft)}
   .intro b{color:var(--ink)}
@@ -115,6 +118,10 @@
     h1{font-size:21px}
     .masthead{align-items:flex-start}
     .runinfo{text-align:left}
+    .pagenav{grid-template-columns:1fr 1fr;padding:10px 16px 0}
+    .navlink{padding:8px 9px}
+    .navlink strong{font-size:12px}
+    .navlink small{display:none}
     th,td{padding:8px 7px}
     .hide-sp{display:none}
     .region-chip{display:none}
@@ -161,8 +168,8 @@
 </header>
 
 <nav class="pagenav">
-  <a class="navlink" href="index.html">← カレンダー台帳</a>
-  <a class="navlink active" href="ranking.html">単価ランキング</a>
+  <a class="navlink" href="index.html"><strong>📅 宿泊カレンダー</strong><small>ポイント・価格を日別に確認</small></a>
+  <a class="navlink active" href="ranking.html" aria-current="page"><strong>📊 単価ランキング</strong><small>ホテル・地域のお得度を比較</small></a>
 </nav>
 
 <div class="intro">
@@ -386,23 +393,23 @@ function regionSummary(withData){
   const byR=new Map();
   for(const a of withData){ if(!byR.has(a.region)) byR.set(a.region,[]); byR.get(a.region).push(a); }
   const rows=[...byR.entries()].map(([region,list])=>{
-    const avg=list.reduce((s,a)=>s+a.avg,0)/list.length;
-    const best=list.reduce((b,a)=>a.avg>b.avg?a:b,list[0]);
-    return {region,count:list.length,avg,best};
-  }).sort((x,y)=>y.avg-x.avg);
-  const maxAvg=Math.max(...rows.map(r=>r.avg),0);
+    const value=list.reduce((s,a)=>s+a[sortKey],0)/list.length;
+    const best=list.reduce((b,a)=>a[sortKey]>b[sortKey]?a:b,list[0]);
+    return {region,count:list.length,value,best};
+  }).sort((x,y)=>y.value-x.value);
+  const maxValue=Math.max(...rows.map(r=>r.value),0);
   return `<table><thead><tr>
-      <th>#</th><th class="l">地域</th><th>地域平均<span class="hide-sp"> 円/pt</span></th><th class="l">ベストホテル</th><th>軒数</th>
+      <th>#</th><th class="l">地域</th><th>${sortLabel()}単価<span class="hide-sp"> 円/pt</span></th><th class="l">該当ホテル</th><th>軒数</th>
     </tr></thead><tbody>
-    ${rows.map((r,i)=>{ const barW=maxAvg>0?Math.max(2,Math.round(r.avg/maxAvg*60)):0; return `<tr>
+    ${rows.map((r,i)=>{ const barW=maxValue>0?Math.max(2,Math.round(r.value/maxValue*60)):0; return `<tr>
       <td class="rank${i<3?' top':''}">${i+1}</td>
       <td class="l">${esc(r.region)}</td>
-      <td class="v avg ${vClass(r.avg)}">${fv(r.avg)}<span class="bar" style="width:${barW}px"></span></td>
-      <td class="l"><a class="hotel-name" href="${esc(r.best.url)}" target="_blank" rel="noopener">${esc(r.best.name)}<span class="arrow">↗</span></a> <span class="muted v">(${fv(r.best.avg)})</span></td>
+      <td class="v avg ${vClass(r.value)}">${fv(r.value)}<span class="bar" style="width:${barW}px"></span></td>
+      <td class="l"><a class="hotel-name" href="${esc(r.best.url)}" target="_blank" rel="noopener">${esc(r.best.name)}<span class="arrow">↗</span></a></td>
       <td class="v muted">${r.count}</td>
     </tr>`; }).join('')}
   </tbody></table>
-  <div class="note">地域平均＝その地域の各ホテル「平均単価」の平均。ベストホテル＝平均単価が最も高いホテル。</div>`;
+  <div class="note">地域の${sortLabel()}単価＝その地域にある各ホテルの「${sortLabel()}単価」を平均。該当ホテル＝その指標が地域内で最も高いホテル。</div>`;
 }
 
 function renderMain(){
@@ -415,9 +422,12 @@ function renderMain(){
   }
   let html='';
   if(activeRegion==='すべて'){
-    html+=`<h2>地域別ランキング<span class="sub">地域平均単価の高い順</span></h2>`;
+    html+=`<h2>全ホテル ランキング<span class="sub">${withData.length}軒／${sortLabel()}単価の高い順</span></h2>`;
+    html+=sortControls();
+    html+=leaderCards(withData);
+    html+=rankTable(withData);
+    html+=`<h2>地域別ランキング<span class="sub">${sortLabel()}単価の高い順</span></h2>`;
     html+=regionSummary(withData);
-    html+=`<div class="all-regions-guide">ホテル別ランキングは、上の地域タブから地域を選ぶと表示されます。</div>`;
   }else{
     const list=withData.filter(a=>a.region===activeRegion);
     html+=`<h2>${esc(activeRegion)} ランキング<span class="sub">${list.length}軒／${{avg:'平均',max:'最高',min:'最低'}[sortKey]}単価の高い順</span></h2>`;
